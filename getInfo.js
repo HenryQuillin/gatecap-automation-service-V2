@@ -88,13 +88,13 @@ async function scrapePage(permalink) {
         await page.screenshot({ path: "screenshot.png" });
 
         await Promise.all([
-          page.waitForNavigation({ waitUntil: "networkidle0" }),
+          page.waitForNavigation({ waitUntil: "load" }),
           page.click(".login"),
         ]);
 
         await page.goto(
           "https://www.crunchbase.com/discover/saved/view-for-automation/2fe3a89b-0a52-4f11-b3e7-b7ec2777f00a",
-          { waitUntil: "networkidle2", timeout: 45000 }
+          { waitUntil: "load", timeout: 45000 }
         );
 
         await page.type("#mat-input-1", permalink);
