@@ -1,6 +1,7 @@
 const Airtable = require("airtable");
 const axios = require("axios");
 const puppeteer = require("puppeteer-extra");
+require("dotenv").config();
 
 // Add stealth plugin and use defaults
 const pluginStealth = require("puppeteer-extra-plugin-stealth");
@@ -58,8 +59,17 @@ async function scrapePage(permalink) {
   puppeteer.use(pluginStealth());
   return puppeteer
     .launch({
-      headless: false,
-      args: ["--no-sandbox", "--disable-setuid-sandbox"],
+      headless:"new",
+      args: [
+        "--disable-setuid-sandbox",
+        "--no-sandbox",
+        "--single-process",
+        "--no-zygote",
+      ],
+      executablePath:
+        process.env.NODE_ENV === "production"
+          ? process.env.PUPPETEER_EXECUTABLE_PATH
+          : puppeteer.executablePath(),
     })
     .then(async (browser) => {
       const page = await browser.newPage();
