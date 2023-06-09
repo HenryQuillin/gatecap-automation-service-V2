@@ -75,10 +75,11 @@ async function scrapePage(permalink) {
       const page = await browser.newPage();
       // await page.screenshot({ path: "screenshot.png" });
 
-      await page.goto("https://www.crunchbase.com/login", {
+      await page.goto("https://example.com/", {
         waitUntil: "networkidle2",
         timeout: 45000,
       });
+      console.log("went to example.com ")
 
       await page.screenshot({ path: "screenshot.png" });
 
