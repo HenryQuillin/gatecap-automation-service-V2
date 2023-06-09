@@ -94,7 +94,7 @@ async function scrapePage(permalink) {
 
         await page.goto(
           "https://www.crunchbase.com/discover/saved/view-for-automation/2fe3a89b-0a52-4f11-b3e7-b7ec2777f00a",
-          { waitUntil: "networkidle2", timeout: 25000 }
+          { waitUntil: "networkidle2", timeout: 45000 }
         );
 
         await page.type("#mat-input-1", permalink);
