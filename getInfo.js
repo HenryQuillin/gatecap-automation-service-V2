@@ -58,7 +58,7 @@ async function scrapePage(permalink) {
   puppeteer.use(pluginStealth());
   return puppeteer
     .launch({
-      headless: "new",
+      headless: false,
       args: ["--no-sandbox", "--disable-setuid-sandbox"],
     })
     .then(async (browser) => {
