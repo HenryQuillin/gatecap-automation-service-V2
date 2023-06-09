@@ -77,7 +77,7 @@ async function scrapePage(permalink) {
 
       await page.goto("https://www.crunchbase.com/login", {
         waitUntil: "networkidle2",
-        timeout: 22000,
+        timeout: 45000,
       });
 
       await page.screenshot({ path: "screenshot.png" });
