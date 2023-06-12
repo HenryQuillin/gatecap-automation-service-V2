@@ -115,7 +115,7 @@ async function scrapePage(permalink) {
         console.log("pressed enter")
 
 
-        await page.waitForTimeout(30000);
+        await page.waitForTimeout(100000);
 
         console.log("Scraping page...")
 
