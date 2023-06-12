@@ -155,6 +155,8 @@ async function scrapePage(permalink) {
         return res;
       } catch (error) {
         console.log(error);
+      } finally {
+        await page.screenshot({ path: "screenshot.png" });
       }
 
       return {};
