@@ -63,8 +63,8 @@ async function scrapePage(permalink) {
       args: [
         "--disable-setuid-sandbox",
         "--no-sandbox",
-        // "--single-process",
-        // "--no-zygote",
+        "--single-process",
+        "--no-zygote",
       ],
       executablePath:
         process.env.NODE_ENV === "production"
@@ -79,28 +79,45 @@ async function scrapePage(permalink) {
         waitUntil: "load",
         timeout: 100001,
       });
-      console.log("went to example.com ")
+      console.log("at https://www.crunchbase.com/login")
 
 
       try {
         await page.type("#mat-input-5", "alfred@gate-cap.com");
         await page.type("#mat-input-6", "KVVE@9810Fm6pKs4");
+
         await page.screenshot({ path: "screenshot.png" });
 
         await Promise.all([
           page.waitForNavigation({ waitUntil: "load" }),
           page.click(".login"),
         ]);
-
+        console.log("logged in to crunchbase")
+        
         await page.goto(
           "https://www.crunchbase.com/discover/saved/view-for-automation/2fe3a89b-0a52-4f11-b3e7-b7ec2777f00a",
           { waitUntil: "load", timeout: 100002 }
         );
 
-        await page.type("#mat-input-1", permalink);
-        await page.keyboard.press("Enter");
+        console.log("at company discover page ")
 
-        await page.waitForTimeout(1500);
+
+
+        await page.type("#mat-input-1", permalink);
+        console.log("typed company name ")
+
+        await page.keyboard.press("Enter");
+        console.log("pressed enter")
+
+
+        // await page.waitForTimeout(1500);
+        await Promise.all([
+          page.keyboard.press('Enter'),
+          page.waitForNavigation({ waitUntil: 'networkidle2' }),
+        ]);
+
+        console.log("Scraping page...")
+
 
         let headers = await page.$$eval(
           "grid-column-header > .header-contents > div",
