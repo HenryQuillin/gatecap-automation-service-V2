@@ -68,7 +68,7 @@ async function scrapePage(permalink) {
       ],
       executablePath:
         process.env.NODE_ENV === "production"
-          ? process.env.PUPPETEER_EXECUTABLE_PATH
+          ? process.env.CHROME_BIN// process.env.PUPPETEER_EXECUTABLE_PATH
           : puppeteer.executablePath(),
     })
     .then(async (browser) => {
