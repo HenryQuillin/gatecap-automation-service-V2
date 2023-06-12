@@ -105,6 +105,7 @@ async function scrapePage(permalink) {
 
         await page.type("#mat-input-1", permalink);
         console.log("typed company name ")
+        await page.waitForTimeout(10000);
 
         await page.keyboard.press("Enter");
 
