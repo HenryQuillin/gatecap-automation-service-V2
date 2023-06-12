@@ -77,7 +77,7 @@ async function scrapePage(permalink) {
 
       await page.goto("https://www.crunchbase.com/login", {
         waitUntil: "load",
-        timeout: 100001,
+        timeout: 10001,
       });
       console.log("at https://www.crunchbase.com/login")
 
@@ -96,7 +96,7 @@ async function scrapePage(permalink) {
         
         await page.goto(
           "https://www.crunchbase.com/discover/saved/view-for-automation/2fe3a89b-0a52-4f11-b3e7-b7ec2777f00a",
-          { waitUntil: "load", timeout: 100002 }
+          { waitUntil: "load", timeout: 10002 }
         );
 
         console.log("at company discover page ")
@@ -116,7 +116,7 @@ async function scrapePage(permalink) {
         console.log("pressed enter")
 
 
-        await page.waitForTimeout(100000);
+        await page.waitForTimeout(10000);
 
         console.log("Scraping page...")
 
