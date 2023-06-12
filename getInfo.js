@@ -107,14 +107,15 @@ async function scrapePage(permalink) {
         console.log("typed company name ")
 
         await page.keyboard.press("Enter");
+
+        // await Promise.all([
+        //   page.keyboard.press('Enter'),
+        //   page.waitForNavigation({ waitUntil: 'networkidle2' }),
+        // ]);
         console.log("pressed enter")
 
 
-        await page.waitForTimeout(10000);
-        await Promise.all([
-          page.keyboard.press('Enter'),
-          page.waitForNavigation({ waitUntil: 'networkidle2' }),
-        ]);
+        await page.waitForTimeout(30000);
 
         console.log("Scraping page...")
 
