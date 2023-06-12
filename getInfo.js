@@ -60,6 +60,7 @@ async function scrapePage(permalink) {
   return puppeteer
     .launch({
       headless:"new",
+      // slowMo: 250,
       args: [
         "--disable-setuid-sandbox",
         "--no-sandbox",
@@ -79,10 +80,14 @@ async function scrapePage(permalink) {
         waitUntil: "load",
         timeout: 10001,
       });
+      
       console.log("at https://www.crunchbase.com/login")
 
 
       try {
+
+        await page.waitForSelector("#mat-input-5");
+        await page.waitForSelector("#mat-input-6");
         await page.type("#mat-input-5", "alfred@gate-cap.com");
         await page.type("#mat-input-6", "KVVE@9810Fm6pKs4");
 
@@ -105,7 +110,7 @@ async function scrapePage(permalink) {
 
         await page.type("#mat-input-1", permalink);
         console.log("typed company name ")
-        await page.waitForTimeout(10000);
+        await page.waitForTimeout(5000);
 
         await page.keyboard.press("Enter");
 
