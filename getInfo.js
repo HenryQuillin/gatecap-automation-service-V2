@@ -110,7 +110,7 @@ async function scrapePage(permalink) {
         console.log("pressed enter")
 
 
-        // await page.waitForTimeout(1500);
+        await page.waitForTimeout(10000);
         await Promise.all([
           page.keyboard.press('Enter'),
           page.waitForNavigation({ waitUntil: 'networkidle2' }),
