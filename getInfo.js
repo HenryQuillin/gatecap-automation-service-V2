@@ -156,7 +156,6 @@ async function scrapePage(permalink) {
       } catch (error) {
           await page.screenshot({ path: "sc/6-catch-block.png" });
           uploadFile("sc/6-catch-block.png", "6-catch-block.png",folderName); 
-          await page.close();
           console.error("ERROR CAUGHT:" + error);
       } finally {
         await page.screenshot({ path: "sc/7-finished.png" });
