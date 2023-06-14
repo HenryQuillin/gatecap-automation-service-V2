@@ -63,16 +63,16 @@ async function scrapePage(permalink) {
   return puppeteer
     .launch({
       headless: "new",
-      // slowMo: 250,
+      slowMo: 250,
       args: [
         "--disable-setuid-sandbox",
         "--no-sandbox",
-        "--proxy-server=http://2.56.119.93:5074",
+        "--proxy-server=us-pr.oxylabs.io:10001",
       ],
     })
     .then(async (browser) => {
-      const username = 'zxigrhvy';
-      const pass = 'n8uhs3aoo2qi';
+      const username = 'gatecap';
+      const pass = 'posHQ112015-';
       const page = await browser.newPage();
 
       await page.authenticate({        
@@ -80,9 +80,9 @@ async function scrapePage(permalink) {
         password: pass
       })
 
+
       await page.goto("https://www.crunchbase.com/login", {
         waitUntil: "load",
-        timeout: 10001,
       });
 
       console.log("at login");
@@ -108,7 +108,6 @@ async function scrapePage(permalink) {
 
         await page.goto(
           "https://www.crunchbase.com/discover/saved/view-for-automation/2fe3a89b-0a52-4f11-b3e7-b7ec2777f00a",
-          { waitUntil: "load", timeout: 10002 }
         );
 
         console.log("at company discover page");

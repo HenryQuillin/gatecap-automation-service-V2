@@ -27,7 +27,7 @@ const uploadFile = async (fileName, fileKey, folderName) => {
     // Uploading files to the bucket
     try {
         const data = await s3.upload(params).promise();
-        console.log(`File uploaded successfully. ${data.Location}`);
+        // console.log(`File uploaded successfully. ${data.Location}`);
     } catch (err) {
         console.log('Error uploading file:', err);
     }
