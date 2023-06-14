@@ -67,11 +67,18 @@ async function scrapePage(permalink) {
       args: [
         "--disable-setuid-sandbox",
         "--no-sandbox",
-        // "--proxy-server=http://50.217.153.74:80",
+        "--proxy-server=http://2.56.119.93:5074",
       ],
     })
     .then(async (browser) => {
+      const username = 'zxigrhvy';
+      const pass = 'n8uhs3aoo2qi';
       const page = await browser.newPage();
+
+      await page.authenticate({        
+        username: username,
+        password: pass
+      })
 
       await page.goto("https://www.crunchbase.com/login", {
         waitUntil: "load",
