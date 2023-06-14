@@ -4,3 +4,8 @@ npm-debug.log
 .DS_Store
 screenshot.png
 /*.env
+
+sc/*
+
+# exception to the rule
+!sc/.gitkeep 

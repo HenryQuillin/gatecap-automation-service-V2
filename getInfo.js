@@ -2,6 +2,9 @@ const Airtable = require("airtable");
 const axios = require("axios");
 const puppeteer = require("puppeteer-extra");
 require("dotenv").config();
+const { uploadFile } = require("./uploadFile");
+const moment = require('moment-timezone');
+
 
 // Add stealth plugin and use defaults
 const pluginStealth = require("puppeteer-extra-plugin-stealth");
@@ -51,79 +54,78 @@ async function getUUID(name) {
   }
 }
 
-module.exports = {
-  getInfo: getInfo,
-};
-
 async function scrapePage(permalink) {
+  const folderName = getDate();
+
+
+
   puppeteer.use(pluginStealth());
   return puppeteer
     .launch({
-      headless:"new",
+      headless: "new",
       // slowMo: 250,
       args: [
         "--disable-setuid-sandbox",
         "--no-sandbox",
-        // "--single-process",
-        // "--no-zygote",
+        // "--proxy-server=http://50.217.153.74:80",
       ],
-      // executablePath:
-      //   process.env.NODE_ENV === "production"
-      //     ? process.env.CHROME_BIN// process.env.PUPPETEER_EXECUTABLE_PATH
-      //     : puppeteer.executablePath(),
     })
     .then(async (browser) => {
       const page = await browser.newPage();
-      // await page.screenshot({ path: "screenshot.png" });
 
       await page.goto("https://www.crunchbase.com/login", {
         waitUntil: "load",
         timeout: 10001,
       });
-      
-      console.log("at https://www.crunchbase.com/login")
+
+      console.log("at login");
+      await page.screenshot({ path: "sc/1-at-login.png" });
+      uploadFile("sc/1-at-login.png", "1-at-login.png",folderName); 
 
 
       try {
-
         await page.waitForSelector("#mat-input-5");
         await page.waitForSelector("#mat-input-6");
         await page.type("#mat-input-5", "alfred@gate-cap.com");
         await page.type("#mat-input-6", "KVVE@9810Fm6pKs4");
 
-        await page.screenshot({ path: "screenshot.png" });
 
         await Promise.all([
           page.waitForNavigation({ waitUntil: "load" }),
           page.click(".login"),
         ]);
-        console.log("logged in to crunchbase")
-        
+
+        console.log("logged in");
+        await page.screenshot({ path: "sc/2-logged-in.png" });
+        uploadFile("sc/2-logged-in.png", "2-logged-in.png",folderName); 
+
         await page.goto(
           "https://www.crunchbase.com/discover/saved/view-for-automation/2fe3a89b-0a52-4f11-b3e7-b7ec2777f00a",
           { waitUntil: "load", timeout: 10002 }
         );
 
-        console.log("at company discover page ")
-
+        console.log("at company discover page");
+        await page.screenshot({ path: "sc/3-at-discover-page.png" });
+        uploadFile("sc/3-at-discover-page.png", "3-at-discover-page.png",folderName); 
 
 
         await page.type("#mat-input-1", permalink);
-        console.log("typed company name ")
-        await page.waitForTimeout(5000);
+
+        console.log("typed company name ");
+        await page.screenshot({ path: "sc/4-typed-company-name.png" });
+        uploadFile("sc/4-typed-company-name.png", "4-typed-company-name.png",folderName); 
+
+
 
         await page.keyboard.press("Enter");
 
-        // await Promise.all([
-        //   page.keyboard.press('Enter'),
-        //   page.waitForNavigation({ waitUntil: 'networkidle2' }),
-        // ]);
-        console.log("pressed enter")
+
+        console.log("pressed enter");
+        await page.screenshot({ path: "sc/5-pressed-enter.png" });
+        uploadFile("sc/5-pressed-enter.png", "5-pressed-enter.png",folderName); 
 
 
-        await page.waitForTimeout(10000);
-
-        console.log("Scraping page...")
+        console.log("Scraping page...");
 
 
         let headers = await page.$$eval(
@@ -150,13 +152,16 @@ async function scrapePage(permalink) {
         for (let i = 0; i < headers.length; i++) {
           res[headers[i]] = contents[i];
         }
-        await page.close();
-
         return res;
       } catch (error) {
-        console.log(error);
+          await page.screenshot({ path: "sc/6-catch-block.png" });
+          uploadFile("sc/6-catch-block.png", "6-catch-block.png",folderName); 
+          await page.close();
+          console.error("ERROR CAUGHT:" + error);
       } finally {
-        await page.screenshot({ path: "screenshot.png" });
+        await page.screenshot({ path: "sc/7-finished.png" });
+        uploadFile("sc/7-finished.png", "7-finished.png",folderName); 
+        await page.close();
       }
 
       return {};
@@ -226,3 +231,23 @@ async function updateAirtable(data, recordID) {
     }
   );
 }
+
+
+function getDate(){
+  const date = moment().tz("America/Chicago");
+  let month = '' + (date.month() + 1); // Months are zero-indexed in moment.js
+  let day = '' + date.date();
+  let hour = '' + date.hours();
+  let minute = '' + date.minutes();
+
+  if (month.length < 2) month = '0' + month;
+  if (day.length < 2) day = '0' + day;
+  if (hour.length < 2) hour = '0' + hour;
+  if (minute.length < 2) minute = '0' + minute;
+
+  return `${month}-${day}-${hour}-${minute}`;
+}
+
+module.exports = {
+  getInfo: getInfo,
+};
