@@ -21,14 +21,13 @@ async function getInfo(req, res) {
 
     const data1 = await getBasicInfo(permalink);
     let messages = [];
-    let errPageContent;
 
-    const data2 = await scrapePage(messages, permalink, errPageContent);
+    const data2 = await scrapePage(messages, permalink);
     const data = { ...data1, ...data2 };
     console.log(data);
     await updateAirtable(data, req.body.newlyAddedRecordID);
 
-    res.json({ messages: messages, errPageContent: errPageContent, data: data });
+    res.json({ messages: messages, data: data });
   } catch (error) {
     console.error(error);
     res.status(500).send("An error occurred");
@@ -37,7 +36,7 @@ async function getInfo(req, res) {
 
 
 
-async function scrapePage(messages, permalink, errPageContent) {
+async function scrapePage(messages, permalink) {
   const folderName = getDate();
 
   puppeteer.use(pluginStealth());
@@ -154,7 +153,7 @@ async function scrapePage(messages, permalink, errPageContent) {
       } catch (error) {
         await page.screenshot({ path: "sc/7-catch-block.png" });
         uploadFile("sc/7-catch-block.png", "7-catch-block.png", folderName);
-        errPageContent = await page.content();
+        messages.push(await page.content());
         console.error("ERROR CAUGHT:" + error);
       } finally {
         await page.screenshot({ path: "sc/8-finished.png" });
