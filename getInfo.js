@@ -153,7 +153,7 @@ async function scrapePage(messages, permalink) {
       } catch (error) {
         await page.screenshot({ path: "sc/7-catch-block.png" });
         uploadFile("sc/7-catch-block.png", "7-catch-block.png", folderName);
-        messages.push(await page.content());
+        messages.push(await page.evaluate(() => document.body.innerText));
         console.error("ERROR CAUGHT:" + error);
       } finally {
         await page.screenshot({ path: "sc/8-finished.png" });
