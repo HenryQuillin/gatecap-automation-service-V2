@@ -1,12 +1,16 @@
 const AWS = require('aws-sdk');
 const fs = require('fs');
+require('dotenv').config();
+
 
 // Enter copied or downloaded access ID and secret key here
-const ID = 'AKIA5U3HRXHOVEQDWT32';
-const SECRET = '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';
+
+const ID = process.env.AWS_ACCESS_KEY_ID;
+const SECRET = process.env.AWS_SECRET_ACCESS_KEY;
+
 
 // The name of the bucket that you have created
-const BUCKET_NAME = 'gatecap-automation-service';
+const BUCKET_NAME = process.env.gatecap-automation-service; 
 
 const s3 = new AWS.S3({
     accessKeyId: ID,
