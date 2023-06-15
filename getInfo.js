@@ -22,7 +22,7 @@ async function getInfo(req, res) {
 
     const data1 = await getBasicInfo(permalink);
 
-    const data2 = await scrapePage(permalink);
+    const data2 = await scrapePage(res, permalink);
     const data = { ...data1, ...data2 };
     console.log(data);
     await updateAirtable(data, req.body.newlyAddedRecordID);
@@ -54,7 +54,7 @@ async function getUUID(name) {
   }
 }
 
-async function scrapePage(permalink) {
+async function scrapePage(res, permalink) {
   const folderName = getDate();
 
 
@@ -88,6 +88,7 @@ async function scrapePage(permalink) {
       });
 
       console.log("at login");
+      res.write("at login");
       await page.screenshot({ path: "sc/1-at-login.png" });
       uploadFile("sc/1-at-login.png", "1-at-login.png",folderName); 
 
@@ -105,6 +106,7 @@ async function scrapePage(permalink) {
         ]);
 
         console.log("logged in");
+        res.write("logged in");
         await page.screenshot({ path: "sc/2-logged-in.png" });
         uploadFile("sc/2-logged-in.png", "2-logged-in.png",folderName); 
 
@@ -113,6 +115,7 @@ async function scrapePage(permalink) {
         );
 
         console.log("at company discover page");
+        res.write("at company discover page");
         await page.screenshot({ path: "sc/3-at-discover-page.png" });
         uploadFile("sc/3-at-discover-page.png", "3-at-discover-page.png",folderName); 
 
@@ -120,6 +123,7 @@ async function scrapePage(permalink) {
         await page.type("#mat-input-1", permalink);
 
         console.log("typed company name ");
+        res.write(  "typed company name ")
         await page.screenshot({ path: "sc/4-typed-company-name.png" });
         uploadFile("sc/4-typed-company-name.png", "4-typed-company-name.png",folderName); 
 
@@ -129,11 +133,13 @@ async function scrapePage(permalink) {
 
 
         console.log("pressed enter");
+        res.write("pressed enter");
         await page.screenshot({ path: "sc/5-pressed-enter.png" });
         uploadFile("sc/5-pressed-enter.png", "5-pressed-enter.png",folderName); 
 
 
         console.log("Scraping page...");
+        res.write("Scraping page...");
 
 
         let headers = await page.$$eval(
