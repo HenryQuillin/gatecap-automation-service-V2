@@ -35,27 +35,9 @@ async function getInfo(req, res) {
   }
 }
 
-async function getUUID(name) {
-  let config = {
-    method: "get",
-    maxBodyLength: Infinity,
-    url: `https://api.crunchbase.com/api/v4/autocompletes?query=${encodeURIComponent(
-      name
-    )}&collection_ids=organizations&limit=1`,
-    headers: {
-      "X-cb-user-key": "9011e1fdbe5146865162bb45b036aa92",
-    },
-  };
 
-  try {
-    let response = await axios.request(config);
-    return response.data.entities[0].identifier.permalink;
-  } catch (error) {
-    console.error(error);
-  }
-}
 
-async function scrapePage(messages, permalink) {
+async function scrapePage(messages, permalink, errPageContent) {
   const folderName = getDate();
 
   puppeteer.use(pluginStealth());
@@ -172,7 +154,7 @@ async function scrapePage(messages, permalink) {
       } catch (error) {
         await page.screenshot({ path: "sc/7-catch-block.png" });
         uploadFile("sc/7-catch-block.png", "7-catch-block.png", folderName);
-        pageContent = await page.content();
+        errPageContent = await page.content();
         console.error("ERROR CAUGHT:" + error);
       } finally {
         await page.screenshot({ path: "sc/8-finished.png" });
@@ -184,6 +166,25 @@ async function scrapePage(messages, permalink) {
     });
 }
 
+async function getUUID(name) {
+  let config = {
+    method: "get",
+    maxBodyLength: Infinity,
+    url: `https://api.crunchbase.com/api/v4/autocompletes?query=${encodeURIComponent(
+      name
+    )}&collection_ids=organizations&limit=1`,
+    headers: {
+      "X-cb-user-key": "9011e1fdbe5146865162bb45b036aa92",
+    },
+  };
+
+  try {
+    let response = await axios.request(config);
+    return response.data.entities[0].identifier.permalink;
+  } catch (error) {
+    console.error(error);
+  }
+}
 async function getBasicInfo(permalink) {
   let config = {
     method: "get",
