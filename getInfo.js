@@ -21,13 +21,14 @@ async function getInfo(req, res) {
     const permalink = await getUUID(recordName);
 
     const data1 = await getBasicInfo(permalink);
+    let messages = [];
 
-    const data2 = await scrapePage(res, permalink);
+    const data2 = await scrapePage(messages, permalink);
     const data = { ...data1, ...data2 };
     console.log(data);
     await updateAirtable(data, req.body.newlyAddedRecordID);
 
-    res.json({ data: data });
+    res.json({ messages: messages, data: data });
   } catch (error) {
     console.error(error);
     res.status(500).send("An error occurred");
@@ -54,7 +55,7 @@ async function getUUID(name) {
   }
 }
 
-async function scrapePage(res, permalink) {
+async function scrapePage(messages, permalink) {
   const folderName = getDate();
 
 
@@ -88,7 +89,7 @@ async function scrapePage(res, permalink) {
       });
 
       console.log("at login");
-      res.write("at login");
+      messages.push("at login");
       await page.screenshot({ path: "sc/1-at-login.png" });
       uploadFile("sc/1-at-login.png", "1-at-login.png",folderName); 
 
@@ -106,7 +107,7 @@ async function scrapePage(res, permalink) {
         ]);
 
         console.log("logged in");
-        res.write("logged in");
+        messages.push("logged in");
         await page.screenshot({ path: "sc/2-logged-in.png" });
         uploadFile("sc/2-logged-in.png", "2-logged-in.png",folderName); 
 
@@ -115,7 +116,7 @@ async function scrapePage(res, permalink) {
         );
 
         console.log("at company discover page");
-        res.write("at company discover page");
+        messages.push("at company discover page");
         await page.screenshot({ path: "sc/3-at-discover-page.png" });
         uploadFile("sc/3-at-discover-page.png", "3-at-discover-page.png",folderName); 
 
@@ -123,7 +124,7 @@ async function scrapePage(res, permalink) {
         await page.type("#mat-input-1", permalink);
 
         console.log("typed company name ");
-        res.write(  "typed company name ")
+        messages.push(  "typed company name ")
         await page.screenshot({ path: "sc/4-typed-company-name.png" });
         uploadFile("sc/4-typed-company-name.png", "4-typed-company-name.png",folderName); 
 
@@ -133,13 +134,13 @@ async function scrapePage(res, permalink) {
 
 
         console.log("pressed enter");
-        res.write("pressed enter");
+        messages.push("pressed enter");
         await page.screenshot({ path: "sc/5-pressed-enter.png" });
         uploadFile("sc/5-pressed-enter.png", "5-pressed-enter.png",folderName); 
 
 
         console.log("Scraping page...");
-        res.write("Scraping page...");
+        messages.push("Scraping page...");
 
 
         let headers = await page.$$eval(
