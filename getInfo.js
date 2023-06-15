@@ -64,7 +64,7 @@ async function scrapePage(messages, permalink) {
   return puppeteer
     .launch({
       headless: "new",
-      slowMo: 250,
+      // slowMo: 250,
       args: [
         "--disable-setuid-sandbox",
         "--no-sandbox",
@@ -131,16 +131,20 @@ async function scrapePage(messages, permalink) {
 
 
         await page.keyboard.press("Enter");
+        
 
 
         console.log("pressed enter");
         messages.push("pressed enter");
         await page.screenshot({ path: "sc/5-pressed-enter.png" });
         uploadFile("sc/5-pressed-enter.png", "5-pressed-enter.png",folderName); 
-
+        
+        await page.timeout(10000);
 
         console.log("Scraping page...");
         messages.push("Scraping page...");
+        await page.screenshot({ path: "sc/6-scraping-page.png" });
+        uploadFile("sc/6-scraping-page.png", "6-scraping-page.png",folderName); 
 
 
         let headers = await page.$$eval(
@@ -169,12 +173,12 @@ async function scrapePage(messages, permalink) {
         }
         return res;
       } catch (error) {
-          await page.screenshot({ path: "sc/6-catch-block.png" });
-          uploadFile("sc/6-catch-block.png", "6-catch-block.png",folderName); 
+          await page.screenshot({ path: "sc/7-catch-block.png" });
+          uploadFile("sc/7-catch-block.png", "7-catch-block.png",folderName); 
           console.error("ERROR CAUGHT:" + error);
       } finally {
-        await page.screenshot({ path: "sc/7-finished.png" });
-        uploadFile("sc/7-finished.png", "7-finished.png",folderName); 
+        await page.screenshot({ path: "sc/8-finished.png" });
+        uploadFile("sc/8-finished.png", "8-finished.png",folderName); 
         await page.close();
       }
 
