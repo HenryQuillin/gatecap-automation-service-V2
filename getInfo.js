@@ -21,13 +21,14 @@ async function getInfo(req, res) {
 
     const data1 = await getBasicInfo(permalink);
     let messages = [];
+    let errPageContent;
 
-    const data2 = await scrapePage(messages, permalink);
+    const data2 = await scrapePage(messages, permalink, errPageContent);
     const data = { ...data1, ...data2 };
     console.log(data);
     await updateAirtable(data, req.body.newlyAddedRecordID);
 
-    res.json({ messages: messages, data: data });
+    res.json({ messages: messages, errPageContent: errPageContent, data: data });
   } catch (error) {
     console.error(error);
     res.status(500).send("An error occurred");
@@ -171,6 +172,7 @@ async function scrapePage(messages, permalink) {
       } catch (error) {
         await page.screenshot({ path: "sc/7-catch-block.png" });
         uploadFile("sc/7-catch-block.png", "7-catch-block.png", folderName);
+        pageContent = await page.content();
         console.error("ERROR CAUGHT:" + error);
       } finally {
         await page.screenshot({ path: "sc/8-finished.png" });
