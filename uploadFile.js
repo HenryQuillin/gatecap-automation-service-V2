@@ -10,7 +10,7 @@ const SECRET = process.env.AWS_SECRET_ACCESS_KEY;
 
 
 // The name of the bucket that you have created
-const BUCKET_NAME = process.env.gatecap-automation-service; 
+const BUCKET_NAME = process.env.BUCKET_NAME; 
 
 const s3 = new AWS.S3({
     accessKeyId: ID,
