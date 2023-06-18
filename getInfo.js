@@ -233,7 +233,6 @@ async function getBasicInfo(permalink) {
 }
 
 async function updateAirtable(data, recordID) {
-  console.log("updateAirtable ran");
   base("Deal Flow").update(
     [
       {
