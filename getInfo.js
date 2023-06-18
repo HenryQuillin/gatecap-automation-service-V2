@@ -1,4 +1,11 @@
-const Airtable = require("airtable");
+// const Airtable = require("airtable");
+try {
+  const Airtable = require("airtable");
+
+} catch(e) {
+  console.log("Airtable error caught");
+  console.error(e);
+}
 const axios = require("axios");
 const puppeteer = require("puppeteer-extra");
 require("dotenv").config();
