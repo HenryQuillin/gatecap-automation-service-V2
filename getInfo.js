@@ -1,11 +1,4 @@
-// const Airtable = require("airtable");
-try {
-  const Airtable = require("airtable");
-
-} catch(e) {
-  console.log("Airtable error caught");
-  console.error(e);
-}
+const Airtable = require("airtable");
 const axios = require("axios");
 const puppeteer = require("puppeteer-extra");
 require("dotenv").config();
@@ -15,16 +8,10 @@ const moment = require("moment-timezone");
 // Add stealth plugin and use defaults
 const pluginStealth = require("puppeteer-extra-plugin-stealth");
 
-try {
-  var base = new Airtable({
-    apiKey:
-      "pat6UUeva3HgsCP0B.08d49df5c164666ce8e2415f9a3e0800bb43afbf190450b4be31cd79bccd75fd",
-  }).base("appKfm9gouHkcTC42");
-} catch(e) {
-  console.log("Airtable error caught");
-  console.error(e);
-}
-
+var base = new Airtable({
+  apiKey:
+    "pat6UUeva3HgsCP0B.08d49df5c164666ce8e2415f9a3e0800bb43afbf190450b4be31cd79bccd75fd",
+}).base("appKfm9gouHkcTC42");
 
 async function getInfo(req, res) {
   console.log(req.headers);
@@ -62,6 +49,7 @@ async function scrapePage(messages, permalink) {
       args: [
         "--disable-setuid-sandbox",
         "--no-sandbox",
+        // "--proxy-server=us-pr.oxylabs.io:7777",
         "--proxy-server=us-pr.oxylabs.io:10000",
       ],
     })
