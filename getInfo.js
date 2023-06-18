@@ -47,6 +47,7 @@ async function scrapePage(messages, permalink) {
       args: [
         "--disable-setuid-sandbox",
         "--no-sandbox",
+        // "--proxy-server=us-pr.oxylabs.io:7777",
         "--proxy-server=us-pr.oxylabs.io:10000",
       ],
     })
@@ -117,8 +118,9 @@ async function scrapePage(messages, permalink) {
         messages.push("pressed enter");
         await page.screenshot({ path: "sc/5-pressed-enter.png" });
         uploadFile("sc/5-pressed-enter.png", "5-pressed-enter.png", folderName);
+        await page.waitForSelector('mat-progress-bar', { hidden: true });
 
-        await page.waitForTimeout(10000);
+        // await page.waitForTimeout(10000);
 
         console.log("Scraping page...");
         messages.push("Scraping page...");
@@ -242,7 +244,7 @@ async function updateAirtable(data, recordID) {
         return;
       }
       records.forEach(function (record) {
-        console.log("Updated ", record.get("Name"));
+        console.log("Updated", record.get("Organization Name"));
       });
     }
   );
