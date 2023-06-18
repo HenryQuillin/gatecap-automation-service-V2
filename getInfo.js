@@ -14,6 +14,7 @@ var base = new Airtable({
 }).base("appKfm9gouHkcTC42");
 
 async function getInfo(req, res) {
+  res.json({ res: res });
   try {
     let record = await base("Deal Flow").find(req.body.newlyAddedRecordID);
     let recordName = record.fields["Name"];
