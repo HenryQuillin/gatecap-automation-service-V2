@@ -8,10 +8,16 @@ const moment = require("moment-timezone");
 // Add stealth plugin and use defaults
 const pluginStealth = require("puppeteer-extra-plugin-stealth");
 
-var base = new Airtable({
-  apiKey:
-    "pat6UUeva3HgsCP0B.08d49df5c164666ce8e2415f9a3e0800bb43afbf190450b4be31cd79bccd75fd",
-}).base("appKfm9gouHkcTC42");
+try {
+  var base = new Airtable({
+    apiKey:
+      "pat6UUeva3HgsCP0B.08d49df5c164666ce8e2415f9a3e0800bb43afbf190450b4be31cd79bccd75fd",
+  }).base("appKfm9gouHkcTC42");
+} catch(e) {
+  console.log("Airtable error caught");
+  console.error(e);
+}
+
 
 async function getInfo(req, res) {
   console.log(req.headers);
