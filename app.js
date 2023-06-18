@@ -21,7 +21,9 @@ app.post("/extract", (req, res) => {
 });
   
 app.post("/getinfo", async (req, res) => {
-  getInfo(req, res);
+  setTimeout(run, 5000);
+  function run() { getInfo(req, res);}
+
 });
 
 // eslint-disable-next-line no-undef
