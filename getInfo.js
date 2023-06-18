@@ -50,7 +50,7 @@ async function scrapePage(messages, permalink) {
         "--disable-setuid-sandbox",
         "--no-sandbox",
         // "--proxy-server=us-pr.oxylabs.io:7777",
-        "--proxy-server=us-pr.oxylabs.io:10000",
+        // "--proxy-server=us-pr.oxylabs.io:10000",
       ],
     })
     .then(async (browser) => {
