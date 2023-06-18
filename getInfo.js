@@ -14,8 +14,6 @@ var base = new Airtable({
 }).base("appKfm9gouHkcTC42");
 
 async function getInfo(req, res) {
-  console.log(req.headers);
-  console.log(req.body);
   try {
     let record = await base("Deal Flow").find(req.body.newlyAddedRecordID);
     let recordName = record.fields["Name"];
@@ -23,6 +21,9 @@ async function getInfo(req, res) {
 
     const data1 = await getBasicInfo(permalink);
     let messages = [];
+
+
+    res.status(200).send('Request received. Attempting to scrape data...');
 
     const data2 = await scrapePage(messages, permalink);
     const data = { ...data1, ...data2 };
