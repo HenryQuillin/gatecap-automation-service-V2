@@ -18,6 +18,9 @@ const s3 = new AWS.S3({
 });
 
 const uploadFile = async (fileName, fileKey, folderName) => {
+    console.log("ID: ", ID);
+    console.log("SECRET: ", SECRET);
+    console.log("BUCKET_NAME: ", BUCKET_NAME);
     // Read content from the file
     const fileContent = fs.readFileSync(fileName);
 
