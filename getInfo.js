@@ -99,7 +99,7 @@ async function scrapePage(permalink, recordName) {
         ]);
 
         console.log("logged in");
-        await page.screenshot({ path: "sc/2-logged-in.png" });
+        await page.screenshot({ path: "/sc/2-logged-in.png" });
         uploadFile("sc/2-logged-in.png", "2-logged-in.png", folderName);
 
         await page.goto(
