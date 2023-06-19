@@ -20,22 +20,26 @@ async function getInfo(req, res) {
     const permalink = await getUUID(recordName);
 
     const data1 = await getBasicInfo(permalink);
-    let messages = [];
 
-    res.status(200).send('Request received. Attempting to scrape data...');
+    res.status(200).send("Request received. Attempting to scrape data...");
 
     let retries = 4;
     let data2 = null;
 
     while (retries > 0) {
       try {
-        data2 = await scrapePage(messages, permalink);
+        console.log("Attempt #", 5 - retries);
+        data2 = await scrapePage(permalink, recordName);
         break;
       } catch (error) {
-        console.error('Scraping error:', error);
-        messages.push('Scraping error: ' + error.message);
+        console.error("Scraping error:", error);
+        await updateAirtableErrorDetails(req.body.newlyAddedRecordID, error);
         retries--;
       }
+    }
+    if (retries === 0) {
+      console.error("Max retries reached. Unable to scrape data.");
+      await updateAirtableWithError(req.body.newlyAddedRecordID);
     }
 
     if (data2) {
@@ -43,18 +47,14 @@ async function getInfo(req, res) {
       console.log(data);
       await updateAirtable(data, req.body.newlyAddedRecordID);
     } else {
-      console.error('Max retries reached. Unable to scrape data.');
-      messages.push('Max retries reached. Unable to scrape data.');
+      console.error("Max retries reached. Unable to scrape data.");
     }
   } catch (error) {
-    console.error('An error occurred:', error);
+    console.error("An error occurred:", error);
   }
 }
 
-
-
-
-async function scrapePage(messages, permalink) {
+async function scrapePage(permalink, recordName) {
   const folderName = getDate();
 
   puppeteer.use(pluginStealth());
@@ -84,15 +84,13 @@ async function scrapePage(messages, permalink) {
       await page.goto("https://www.crunchbase.com/login", {
         waitUntil: "load",
       });
-      
 
       console.log("at login");
-      messages.push("at login");
       await page.screenshot({ path: "sc/1-at-login.png" });
       uploadFile("sc/1-at-login.png", "1-at-login.png", folderName);
 
       try {
-        await page.waitForSelector("#mat-input-5");
+        await page.waitForSelector("#mat-input-5", { timeout: 10000 });
         await page.waitForSelector("#mat-input-6");
         await page.type("#mat-input-5", "alfred@gate-cap.com");
         await page.type("#mat-input-6", "KVVE@9810Fm6pKs4");
@@ -103,7 +101,6 @@ async function scrapePage(messages, permalink) {
         ]);
 
         console.log("logged in");
-        messages.push("logged in");
         await page.screenshot({ path: "sc/2-logged-in.png" });
         uploadFile("sc/2-logged-in.png", "2-logged-in.png", folderName);
 
@@ -112,7 +109,6 @@ async function scrapePage(messages, permalink) {
         );
 
         console.log("at company discover page");
-        messages.push("at company discover page");
         await page.screenshot({ path: "sc/3-at-discover-page.png" });
         uploadFile(
           "sc/3-at-discover-page.png",
@@ -123,7 +119,6 @@ async function scrapePage(messages, permalink) {
         await page.type("#mat-input-1", permalink);
 
         console.log("typed company name ");
-        messages.push("typed company name ");
         await page.screenshot({ path: "sc/4-typed-company-name.png" });
         uploadFile(
           "sc/4-typed-company-name.png",
@@ -134,14 +129,11 @@ async function scrapePage(messages, permalink) {
         await page.keyboard.press("Enter");
 
         console.log("pressed enter");
-        messages.push("pressed enter");
         await page.screenshot({ path: "sc/5-pressed-enter.png" });
         uploadFile("sc/5-pressed-enter.png", "5-pressed-enter.png", folderName);
-        await page.waitForSelector('mat-progress-bar', { hidden: true });
-
+        await page.waitForSelector("mat-progress-bar", { hidden: true });
 
         console.log("Scraping page...");
-        messages.push("Scraping page...");
         await page.screenshot({ path: "sc/6-scraping-page.png" });
         uploadFile("sc/6-scraping-page.png", "6-scraping-page.png", folderName);
 
@@ -169,19 +161,23 @@ async function scrapePage(messages, permalink) {
         for (let i = 0; i < headers.length; i++) {
           res[headers[i]] = contents[i];
         }
+        if (res["Organization Name"].toLowerCase().replace(/\s/g, '') !== recordName.toLowerCase().replace(/\s/g, '')) {
+          console.error(`Wrong company scraped: Scraped ${res['Organization Name']} but expected ${recordName}`);
+          throw new Error(`Wrong company scraped: Scraped ${res['Organization Name']} but expected ${recordName}`);
+        }
         return res;
       } catch (error) {
         await page.screenshot({ path: "sc/7-catch-block.png" });
         uploadFile("sc/7-catch-block.png", "7-catch-block.png", folderName);
-        messages.push(await page.evaluate(() => document.body.innerText));
+        console.log("PAGE CONTENT:");
+        console.log(await page.evaluate(() => document.body.innerText));
         console.error("ERROR CAUGHT:" + error);
+        throw error;
       } finally {
         await page.screenshot({ path: "sc/8-finished.png" });
         uploadFile("sc/8-finished.png", "8-finished.png", folderName);
         await page.close();
       }
-
-      return {};
     });
 }
 
@@ -240,6 +236,7 @@ async function getBasicInfo(permalink) {
         },
       ],
       "Diligence Status": "Pending",
+      "Scraping Status": "Basic Info Only",
     };
     return dataToReturn;
   } catch (error) {
@@ -252,7 +249,7 @@ async function updateAirtable(data, recordID) {
     [
       {
         id: recordID,
-        fields: data,
+        fields: { ...data, "Scraping Status": "Success" },
       },
     ],
     function (err, records) {
@@ -265,6 +262,26 @@ async function updateAirtable(data, recordID) {
       });
     }
   );
+}
+async function updateAirtableWithError(recordID) {
+  base("Deal Flow").update([
+    {
+      id: recordID,
+      fields: {
+        "Scraping Status": "Error",
+      },
+    },
+  ]);
+}
+async function updateAirtableErrorDetails(recordID, error) {
+  base("Deal Flow").update([
+    {
+      id: recordID,
+      fields: {
+        "Error Details": error.toString(),
+      },
+    },
+  ]);
 }
 
 function getDate() {
