@@ -13,6 +13,8 @@ var base = new Airtable({
     "pat6UUeva3HgsCP0B.08d49df5c164666ce8e2415f9a3e0800bb43afbf190450b4be31cd79bccd75fd",
 }).base("appKfm9gouHkcTC42");
 
+let path = process.env.PORT ? "/sc/" : "sc/";
+
 async function getInfo(req, res) {
   try {
     let record = await base("Deal Flow").find(req.body.newlyAddedRecordID);
@@ -84,8 +86,8 @@ async function scrapePage(permalink, recordName) {
       });
 
       console.log("at login");
-      await page.screenshot({ path: "/sc/1-at-login.png" });
-      uploadFile("/sc/1-at-login.png", "1-at-login.png", folderName);
+      await page.screenshot({ path: path+"1-at-login.png" });
+      uploadFile(path+"1-at-login.png", "1-at-login.png", folderName);
 
       try {
         await page.waitForSelector("#mat-input-5", { timeout: 10000 });
@@ -100,16 +102,16 @@ async function scrapePage(permalink, recordName) {
 
         console.log("logged in");
         await page.screenshot({ path: "/sc/2-logged-in.png" });
-        uploadFile("sc/2-logged-in.png", "2-logged-in.png", folderName);
+        uploadFile(path+"2-logged-in.png", "2-logged-in.png", folderName);
 
         await page.goto(
           "https://www.crunchbase.com/discover/saved/view-for-automation/2fe3a89b-0a52-4f11-b3e7-b7ec2777f00a"
         );
 
         console.log("at company discover page");
-        await page.screenshot({ path: "sc/3-at-discover-page.png" });
+        await page.screenshot({ path: path+"3-at-discover-page.png" });
         uploadFile(
-          "sc/3-at-discover-page.png",
+          path+"3-at-discover-page.png",
           "3-at-discover-page.png",
           folderName
         );
@@ -117,9 +119,9 @@ async function scrapePage(permalink, recordName) {
         await page.type("#mat-input-1", permalink);
 
         console.log("typed company name ");
-        await page.screenshot({ path: "sc/4-typed-company-name.png" });
+        await page.screenshot({ path: path+"4-typed-company-name.png" });
         uploadFile(
-          "sc/4-typed-company-name.png",
+          path+"4-typed-company-name.png",
           "4-typed-company-name.png",
           folderName
         );
@@ -127,13 +129,13 @@ async function scrapePage(permalink, recordName) {
         await page.keyboard.press("Enter");
 
         console.log("pressed enter");
-        await page.screenshot({ path: "sc/5-pressed-enter.png" });
-        uploadFile("sc/5-pressed-enter.png", "5-pressed-enter.png", folderName);
+        await page.screenshot({ path: path+"5-pressed-enter.png" });
+        uploadFile(path+"5-pressed-enter.png", "5-pressed-enter.png", folderName);
         await page.waitForSelector("mat-progress-bar", { hidden: true });
 
         console.log("Scraping page...");
-        await page.screenshot({ path: "sc/6-scraping-page.png" });
-        uploadFile("sc/6-scraping-page.png", "6-scraping-page.png", folderName);
+        await page.screenshot({ path: path+"6-scraping-page.png" });
+        uploadFile(path+"6-scraping-page.png", "6-scraping-page.png", folderName);
 
         let headers = await page.$$eval(
           "grid-column-header > .header-contents > div",
@@ -165,15 +167,15 @@ async function scrapePage(permalink, recordName) {
         }
         return res;
       } catch (error) {
-        await page.screenshot({ path: "sc/7-catch-block.png" });
-        uploadFile("sc/7-catch-block.png", "7-catch-block.png", folderName);
+        await page.screenshot({ path: path+"7-catch-block.png" });
+        uploadFile(path+"7-catch-block.png", "7-catch-block.png", folderName);
         console.log("PAGE CONTENT:");
         console.log(await page.evaluate(() => document.body.innerText));
         console.error("ERROR CAUGHT:" + error);
         throw error;
       } finally {
-        await page.screenshot({ path: "sc/8-finished.png" });
-        uploadFile("sc/8-finished.png", "8-finished.png", folderName);
+        await page.screenshot({ path: path+"8-finished.png" });
+        uploadFile(path+"8-finished.png", "8-finished.png", folderName);
         await page.close();
       }
     });
