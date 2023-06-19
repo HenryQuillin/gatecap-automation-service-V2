@@ -22,20 +22,35 @@ async function getInfo(req, res) {
     const data1 = await getBasicInfo(permalink);
     let messages = [];
 
-
     res.status(200).send('Request received. Attempting to scrape data...');
 
-    const data2 = await scrapePage(messages, permalink);
-    const data = { ...data1, ...data2 };
-    console.log(data);
-    await updateAirtable(data, req.body.newlyAddedRecordID);
+    let retries = 4;
+    let data2 = null;
 
-    // res.json({ messages: messages, data: data });
+    while (retries > 0) {
+      try {
+        data2 = await scrapePage(messages, permalink);
+        break;
+      } catch (error) {
+        console.error('Scraping error:', error);
+        messages.push('Scraping error: ' + error.message);
+        retries--;
+      }
+    }
+
+    if (data2) {
+      const data = { ...data1, ...data2 };
+      console.log(data);
+      await updateAirtable(data, req.body.newlyAddedRecordID);
+    } else {
+      console.error('Max retries reached. Unable to scrape data.');
+      messages.push('Max retries reached. Unable to scrape data.');
+    }
   } catch (error) {
-    console.error(error);
-    res.status(500).send("An error occurred");
+    console.error('An error occurred:', error);
   }
 }
+
 
 
 
@@ -69,6 +84,7 @@ async function scrapePage(messages, permalink) {
       await page.goto("https://www.crunchbase.com/login", {
         waitUntil: "load",
       });
+      
 
       console.log("at login");
       messages.push("at login");
@@ -123,7 +139,6 @@ async function scrapePage(messages, permalink) {
         uploadFile("sc/5-pressed-enter.png", "5-pressed-enter.png", folderName);
         await page.waitForSelector('mat-progress-bar', { hidden: true });
 
-        // await page.waitForTimeout(10000);
 
         console.log("Scraping page...");
         messages.push("Scraping page...");
