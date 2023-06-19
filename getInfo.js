@@ -13,7 +13,7 @@ var base = new Airtable({
     "pat6UUeva3HgsCP0B.08d49df5c164666ce8e2415f9a3e0800bb43afbf190450b4be31cd79bccd75fd",
 }).base("appKfm9gouHkcTC42");
 
-let path = process.env.PORT ? "/sc/" : "sc/";
+let path = process.env.PORT == null || process.env.PORT == "" ? "sc/" : "/sc/";
 
 async function getInfo(req, res) {
   try {

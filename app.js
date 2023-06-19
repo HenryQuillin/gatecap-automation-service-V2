@@ -21,6 +21,7 @@ app.post("/extract", (req, res) => {
 });
   
 app.post("/getinfo", async (req, res) => {
+  console.log("Request received. Attempting to scrape data...");
   setTimeout(run, 5000);
   function run() { getInfo(req, res);}
 
