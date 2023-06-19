@@ -46,9 +46,7 @@ async function getInfo(req, res) {
       const data = { ...data1, ...data2 };
       console.log(data);
       await updateAirtable(data, req.body.newlyAddedRecordID);
-    } else {
-      console.error("Max retries reached. Unable to scrape data.");
-    }
+    } 
   } catch (error) {
     console.error("An error occurred:", error);
   }
