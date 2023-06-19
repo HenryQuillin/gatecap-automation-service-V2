@@ -85,7 +85,7 @@ async function scrapePage(permalink, recordName) {
 
       console.log("at login");
       await page.screenshot({ path: "/sc/1-at-login.png" });
-      uploadFile("sc/1-at-login.png", "1-at-login.png", folderName);
+      uploadFile("/sc/1-at-login.png", "1-at-login.png", folderName);
 
       try {
         await page.waitForSelector("#mat-input-5", { timeout: 10000 });
