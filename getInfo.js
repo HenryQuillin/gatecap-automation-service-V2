@@ -23,12 +23,12 @@ async function getInfo(req, res) {
 
     res.status(200).send("Request received. Attempting to scrape data...");
 
-    let retries = 4;
+    let retries = 2;
     let data2 = null;
 
     while (retries > 0) {
       try {
-        console.log("Attempt #", 5 - retries);
+        console.log("Attempt #", 3 - retries);
         data2 = await scrapePage(permalink, recordName);
         break;
       } catch (error) {
