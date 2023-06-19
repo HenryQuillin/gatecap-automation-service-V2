@@ -22,8 +22,9 @@ async function getInfo(req, res) {
     const permalink = await getUUID(recordName);
 
     const data1 = await getBasicInfo(permalink);
-
     res.status(200).send("Request received. Attempting to scrape data for", recordName, "...");
+    console.log("Request received. Attempting to scrape data for", recordName, "...");
+    
 
     let retries = 2;
     let data2 = null;
