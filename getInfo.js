@@ -48,7 +48,7 @@ async function getInfo(req, res) {
       const data = { ...data1, ...data2 };
       console.log(data);
       await updateAirtable(data, req.body.newlyAddedRecordID);
-    } 
+    }
   } catch (error) {
     console.error("An error occurred:", error);
   }
@@ -86,8 +86,8 @@ async function scrapePage(permalink, recordName) {
       });
 
       console.log("at login");
-      await page.screenshot({ path: path+"1-at-login.png" });
-      uploadFile(path+"1-at-login.png", "1-at-login.png", folderName);
+      await page.screenshot({ path: path + "1-at-login.png" });
+      uploadFile(path + "1-at-login.png", "1-at-login.png", folderName);
 
       try {
         await page.waitForSelector("#mat-input-5", { timeout: 10000 });
@@ -101,17 +101,17 @@ async function scrapePage(permalink, recordName) {
         ]);
 
         console.log("logged in");
-        await page.screenshot({ path: "/sc/2-logged-in.png" });
-        uploadFile(path+"2-logged-in.png", "2-logged-in.png", folderName);
+        await page.screenshot({ path: path + "2-logged-in.png" });
+        uploadFile(path + "2-logged-in.png", "2-logged-in.png", folderName);
 
         await page.goto(
           "https://www.crunchbase.com/discover/saved/view-for-automation/2fe3a89b-0a52-4f11-b3e7-b7ec2777f00a"
         );
 
         console.log("at company discover page");
-        await page.screenshot({ path: path+"3-at-discover-page.png" });
+        await page.screenshot({ path: path + "3-at-discover-page.png" });
         uploadFile(
-          path+"3-at-discover-page.png",
+          path + "3-at-discover-page.png",
           "3-at-discover-page.png",
           folderName
         );
@@ -119,9 +119,9 @@ async function scrapePage(permalink, recordName) {
         await page.type("#mat-input-1", permalink);
 
         console.log("typed company name ");
-        await page.screenshot({ path: path+"4-typed-company-name.png" });
+        await page.screenshot({ path: path + "4-typed-company-name.png" });
         uploadFile(
-          path+"4-typed-company-name.png",
+          path + "4-typed-company-name.png",
           "4-typed-company-name.png",
           folderName
         );
@@ -129,13 +129,21 @@ async function scrapePage(permalink, recordName) {
         await page.keyboard.press("Enter");
 
         console.log("pressed enter");
-        await page.screenshot({ path: path+"5-pressed-enter.png" });
-        uploadFile(path+"5-pressed-enter.png", "5-pressed-enter.png", folderName);
+        await page.screenshot({ path: path + "5-pressed-enter.png" });
+        uploadFile(
+          path + "5-pressed-enter.png",
+          "5-pressed-enter.png",
+          folderName
+        );
         await page.waitForSelector("mat-progress-bar", { hidden: true });
 
         console.log("Scraping page...");
-        await page.screenshot({ path: path+"6-scraping-page.png" });
-        uploadFile(path+"6-scraping-page.png", "6-scraping-page.png", folderName);
+        await page.screenshot({ path: path + "6-scraping-page.png" });
+        uploadFile(
+          path + "6-scraping-page.png",
+          "6-scraping-page.png",
+          folderName
+        );
 
         let headers = await page.$$eval(
           "grid-column-header > .header-contents > div",
@@ -161,21 +169,28 @@ async function scrapePage(permalink, recordName) {
         for (let i = 0; i < headers.length; i++) {
           res[headers[i]] = contents[i];
         }
-        if (res["Organization Name"].toLowerCase().replace(/\s/g, '') !== recordName.toLowerCase().replace(/\s/g, '')) {
-          console.error(`Wrong company scraped: Scraped ${res['Organization Name']} but expected ${recordName}`);
-          throw new Error(`Wrong company scraped: Scraped ${res['Organization Name']} but expected ${recordName}`);
+        if (
+          res["Organization Name"].toLowerCase().replace(/\s/g, "") !==
+          recordName.toLowerCase().replace(/\s/g, "")
+        ) {
+          console.error(
+            `Wrong company scraped: Scraped ${res["Organization Name"]} but expected ${recordName}`
+          );
+          throw new Error(
+            `Wrong company scraped: Scraped ${res["Organization Name"]} but expected ${recordName}`
+          );
         }
         return res;
       } catch (error) {
-        await page.screenshot({ path: path+"7-catch-block.png" });
-        uploadFile(path+"7-catch-block.png", "7-catch-block.png", folderName);
+        await page.screenshot({ path: path + "7-catch-block.png" });
+        uploadFile(path + "7-catch-block.png", "7-catch-block.png", folderName);
         console.log("PAGE CONTENT:");
         console.log(await page.evaluate(() => document.body.innerText));
         console.error("ERROR CAUGHT:" + error);
         throw error;
       } finally {
-        await page.screenshot({ path: path+"8-finished.png" });
-        uploadFile(path+"8-finished.png", "8-finished.png", folderName);
+        await page.screenshot({ path: path + "8-finished.png" });
+        uploadFile(path + "8-finished.png", "8-finished.png", folderName);
         await page.close();
       }
     });
