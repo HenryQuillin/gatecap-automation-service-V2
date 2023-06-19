@@ -184,7 +184,7 @@ async function scrapePage(permalink, recordName) {
       } catch (error) {
         await page.screenshot({ path: path + "7-catch-block.png" });
         uploadFile(path + "7-catch-block.png", "7-catch-block.png", folderName);
-        console.log("PAGE TITLE:");
+        console.log("PAGE H1:");
         console.log(await page.evaluate(() => document.title));
         console.error("ERROR CAUGHT:" + error);
         throw error;

@@ -3,10 +3,10 @@ const cheerio = require("cheerio");
 const stringSimilarity = require('string-similarity');
 let table = "News Log";
 // eslint-disable-next-line no-undef
-let port = process.env.PORT;
-if (port == null || port == "") {
-  table = "News Log - Dev";
-}
+// let port = process.env.PORT;
+// if (port == null || port == "") {
+//   table = "News Log - Dev";
+// }
 
 
 function getArticles(req, res) {
