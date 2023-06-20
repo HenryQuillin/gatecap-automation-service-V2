@@ -219,7 +219,7 @@ async function getBasicInfo(permalink) {
   let config = {
     method: "get",
     maxBodyLength: Infinity,
-    url: `https://api.crunchbase.com/api/v4/entities/organizations/${permalink}?field_ids=facebook%2Ctwitter%2Clinkedin%2Cshort_description%2Cimage_url`,
+    url: `https://api.crunchbase.com/api/v4/entities/organizations/${permalink}?field_ids=facebook%2Cwebsite_url%2Ctwitter%2Clinkedin%2Cshort_description%2Cimage_url`,
     headers: {
       "X-cb-user-key": "9011e1fdbe5146865162bb45b036aa92",
       Cookie: "cid=CiheL2R/ki9+eQAaGtHbAg==",
