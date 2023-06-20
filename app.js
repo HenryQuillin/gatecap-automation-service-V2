@@ -22,8 +22,7 @@ app.post("/extract", (req, res) => {
   
 app.post("/getinfo", async (req, res) => {
   console.log("Request received.");
-  setTimeout(run, 5000);
-  function run() { getInfo(req, res);}
+  getInfo(req, res);
 
 });
 
