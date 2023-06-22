@@ -8,11 +8,13 @@ const moment = require("moment-timezone");
 // Add stealth plugin and use defaults
 const pluginStealth = require("puppeteer-extra-plugin-stealth");
 
+
 var base = new Airtable({
   apiKey:
     "pat6UUeva3HgsCP0B.08d49df5c164666ce8e2415f9a3e0800bb43afbf190450b4be31cd79bccd75fd",
 }).base("appKfm9gouHkcTC42");
 
+// eslint-disable-next-line no-undef
 let path = process.env.PORT == null || process.env.PORT == "" ? "sc/" : "/sc/";
 
 async function getInfo(req, res) {
@@ -25,15 +27,16 @@ async function getInfo(req, res) {
     res.status(200).send("Request received. Attempting to scrape data for", recordName, "...");
     console.log("Request received. Attempting to scrape data for", recordName, "...");
 
-    let retries = 2;
+    let retries = 4;
     let data2 = null;
-
+    let err; 
     while (retries > 0) {
       try {
-        console.log("Attempt #", 3 - retries);
+        console.log("Attempt #", 5 - retries);
         data2 = await scrapePage(permalink, recordName);
         break;
       } catch (error) {
+        err = error;
         console.error("Scraping error:", error);
         await updateAirtableErrorDetails(req.body.newlyAddedRecordID, error);
         retries--;
@@ -41,7 +44,7 @@ async function getInfo(req, res) {
     }
     if (retries === 0) {
       console.error("Max retries reached. Unable to scrape data.");
-      await updateAirtableWithError(req.body.newlyAddedRecordID);
+      await updateAirtableWithError(req.body.newlyAddedRecordID, err);
     }
 
     if (data2) {
@@ -170,9 +173,17 @@ async function scrapePage(permalink, recordName) {
           res[headers[i]] = contents[i];
         }
         if (
-          res["Organization Name"].toLowerCase().replace(/\s/g, "") !==
-          recordName.toLowerCase().replace(/\s/g, "")
-        ) {
+          res["Organization Name"]
+            .toLowerCase()
+            .replace(/\s/g, "")
+            .replace(/[^\w\s]|_/g, "")
+            .replace(/\s+/g, "") !==
+          recordName
+            .toLowerCase()
+            .replace(/\s/g, "")
+            .replace(/[^\w\s]|_/g, "")
+            .replace(/\s+/g, "")
+        )  {
           console.error(
             `Wrong company scraped: Scraped ${res["Organization Name"]} but expected ${recordName}`
           );
@@ -278,15 +289,26 @@ async function updateAirtable(data, recordID) {
     }
   );
 }
-async function updateAirtableWithError(recordID) {
-  base("Deal Flow").update([
-    {
-      id: recordID,
-      fields: {
-        "Scraping Status": "Error",
+async function updateAirtableWithError(recordID, error) {
+  if(error.toString().includes("Wrong company scraped")){
+    base("Deal Flow").update([
+      {
+        id: recordID,
+        fields: {
+          "Scraping Status": "Not found on Crunchbase",
+        },
       },
-    },
-  ]);
+    ]);
+  } else {
+    base("Deal Flow").update([
+      {
+        id: recordID,
+        fields: {
+          "Scraping Status": "Error",
+        },
+      },
+    ]);
+  }
 }
 async function updateAirtableErrorDetails(recordID, error) {
   base("Deal Flow").update([
