@@ -19,39 +19,47 @@ let path = process.env.PORT == null || process.env.PORT == "" ? "sc/" : "/sc/";
 
 async function getInfo(req, res) {
   try {
-    let record = await base("Deal Flow").find(req.body.newlyAddedRecordID);
-    let recordName = record.fields["Name"];
-    const permalink = await getUUID(recordName);
+    let records = await base("Deal Flow")
+    .select({
+      view: "Scraping in progress",
+    })
+    .all();
+    res.status(200).send("Request received. Attempting to scrape data");
 
-    const data1 = await getBasicInfo(permalink);
-    res.status(200).send("Request received. Attempting to scrape data for", recordName, "...");
-    console.log("Request received. Attempting to scrape data for", recordName, "...");
+    for (let i=0; i < records.length; i++) {
+      let record = records[i];
+      let recordName = record.fields["Name"];
+      const permalink = await getUUID(recordName);
 
-    let retries = 2;
-    let data2 = null;
-    let err; 
-    while (retries > 0) {
-      try {
-        console.log("Attempt #", 3 - retries, " for", recordName);
-        data2 = await scrapePage(permalink, recordName);
-        break;
-      } catch (error) {
-        err = error;
-        console.error("Scraping error:", error);
-        await updateAirtableErrorDetails(req.body.newlyAddedRecordID, error);
-        retries--;
+      const data1 = await getBasicInfo(permalink);
+      console.log("Request received. Attempting to scrape data for", recordName, "...");
+
+      let retries = 2;
+      let data2 = null;
+      let err; 
+      while (retries > 0) {
+        try {
+          console.log("Attempt #", 3 - retries, " for", recordName);
+          data2 = await scrapePage(permalink, recordName);
+          break;
+        } catch (error) {
+          err = error;
+          console.error("Scraping error:", error);
+          await updateAirtableErrorDetails(record.id, error);
+          retries--;
+        }
       }
-    }
-    if (retries === 0) {
-      console.error("Max retries reached. Unable to scrape data.");
-      await updateAirtableWithError(req.body.newlyAddedRecordID, err);
-    }
+      if (retries === 0) {
+        console.error("Max retries reached. Unable to scrape data.");
+        await updateAirtableWithError(record.id, err);
+      }
 
-    if (data2) {
-      const data = { ...data1, ...data2 };
-      console.log(data);
-      await updateAirtable(data, req.body.newlyAddedRecordID);
-    }
+      if (data2) {
+        const data = { ...data1, ...data2 };
+        console.log(data);
+        await updateAirtable(data, record.id);
+      }
+  }
   } catch (error) {
     console.error("An error occurred:", error);
   }
