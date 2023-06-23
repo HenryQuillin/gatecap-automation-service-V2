@@ -27,12 +27,12 @@ async function getInfo(req, res) {
     res.status(200).send("Request received. Attempting to scrape data for", recordName, "...");
     console.log("Request received. Attempting to scrape data for", recordName, "...");
 
-    let retries = 4;
+    let retries = 2;
     let data2 = null;
     let err; 
     while (retries > 0) {
       try {
-        console.log("Attempt #", 5 - retries);
+        console.log("Attempt #", 3 - retries);
         data2 = await scrapePage(permalink, recordName);
         break;
       } catch (error) {
@@ -167,6 +167,7 @@ async function scrapePage(permalink, recordName) {
           "grid-row:first-of-type > grid-cell > div > field-formatter",
           (elements) => elements.map((e) => e.innerText)
         );
+        console.log(contents)
 
         let res = {};
         for (let i = 0; i < headers.length; i++) {
