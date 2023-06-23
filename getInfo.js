@@ -32,7 +32,7 @@ async function getInfo(req, res) {
     let err; 
     while (retries > 0) {
       try {
-        console.log("Attempt #", 3 - retries);
+        console.log("Attempt #", 3 - retries, " for", recordName);
         data2 = await scrapePage(permalink, recordName);
         break;
       } catch (error) {
@@ -88,7 +88,7 @@ async function scrapePage(permalink, recordName) {
         waitUntil: "load",
       });
 
-      console.log("at login");
+      console.log("at login for ", permalink);
       await page.screenshot({ path: path + "1-at-login.png" });
       uploadFile(path + "1-at-login.png", "1-at-login.png", folderName);
 
@@ -103,7 +103,7 @@ async function scrapePage(permalink, recordName) {
           page.click(".login"),
         ]);
 
-        console.log("logged in");
+        console.log("logged in for", permalink);
         await page.screenshot({ path: path + "2-logged-in.png" });
         uploadFile(path + "2-logged-in.png", "2-logged-in.png", folderName);
 
@@ -111,7 +111,7 @@ async function scrapePage(permalink, recordName) {
           "https://www.crunchbase.com/discover/saved/view-for-automation/2fe3a89b-0a52-4f11-b3e7-b7ec2777f00a"
         );
 
-        console.log("at company discover page");
+        console.log("at company discover page for ", permalink);
         await page.screenshot({ path: path + "3-at-discover-page.png" });
         uploadFile(
           path + "3-at-discover-page.png",
@@ -121,7 +121,7 @@ async function scrapePage(permalink, recordName) {
 
         await page.type("#mat-input-1", permalink);
 
-        console.log("typed company name ");
+        console.log("typed company name for ", permalink);
         await page.screenshot({ path: path + "4-typed-company-name.png" });
         uploadFile(
           path + "4-typed-company-name.png",
@@ -131,7 +131,7 @@ async function scrapePage(permalink, recordName) {
 
         await page.keyboard.press("Enter");
 
-        console.log("pressed enter");
+        console.log("pressed enter for ", permalink);
         await page.screenshot({ path: path + "5-pressed-enter.png" });
         uploadFile(
           path + "5-pressed-enter.png",
@@ -140,7 +140,7 @@ async function scrapePage(permalink, recordName) {
         );
         await page.waitForSelector("mat-progress-bar", { hidden: true });
 
-        console.log("Scraping page...");
+        console.log("Scraping page for", permalink,"...");
         await page.screenshot({ path: path + "6-scraping-page.png" });
         uploadFile(
           path + "6-scraping-page.png",
@@ -167,7 +167,7 @@ async function scrapePage(permalink, recordName) {
           "grid-row:first-of-type > grid-cell > div > field-formatter",
           (elements) => elements.map((e) => e.innerText)
         );
-        console.log(contents)
+
 
         let res = {};
         for (let i = 0; i < headers.length; i++) {
