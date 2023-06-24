@@ -9,9 +9,12 @@ const moment = require("moment-timezone");
 const pluginStealth = require("puppeteer-extra-plugin-stealth");
 
 
+const apiKey = process.env.AIRTABLE_API_KEY;
+
+
 var base = new Airtable({
   apiKey:
-    "pat6UUeva3HgsCP0B.08d49df5c164666ce8e2415f9a3e0800bb43afbf190450b4be31cd79bccd75fd",
+  apiKey,
 }).base("appKfm9gouHkcTC42");
 
 // eslint-disable-next-line no-undef
@@ -89,8 +92,6 @@ async function scrapePage(recordName) {
       });
 
       console.log("at login for ", recordName);
-      await page.screenshot({ path: path + "1-at-login.png" });
-      uploadFile(path + "1-at-login.png", "1-at-login.png", folderName);
 
       try {
         await page.waitForSelector("#mat-input-5", { timeout: 10000 });
@@ -104,49 +105,27 @@ async function scrapePage(recordName) {
         ]);
 
         console.log("logged in for", recordName);
-        await page.screenshot({ path: path + "2-logged-in.png" });
-        uploadFile(path + "2-logged-in.png", "2-logged-in.png", folderName);
 
         await page.goto(
           "https://www.crunchbase.com/discover/saved/view-for-automation/2fe3a89b-0a52-4f11-b3e7-b7ec2777f00a"
         );
 
         console.log("at company discover page for ", recordName);
-        await page.screenshot({ path: path + "3-at-discover-page.png" });
-        uploadFile(
-          path + "3-at-discover-page.png",
-          "3-at-discover-page.png",
-          folderName
-        );
+
 
         await page.type("#mat-input-1", recordName);
 
         console.log("typed company name for ", recordName);
-        await page.screenshot({ path: path + "4-typed-company-name.png" });
-        uploadFile(
-          path + "4-typed-company-name.png",
-          "4-typed-company-name.png",
-          folderName
-        );
+
 
         await page.keyboard.press("Enter");
 
         console.log("pressed enter for ", recordName);
-        await page.screenshot({ path: path + "5-pressed-enter.png" });
-        uploadFile(
-          path + "5-pressed-enter.png",
-          "5-pressed-enter.png",
-          folderName
-        );
+
         await page.waitForSelector("mat-progress-bar", { hidden: true });
 
         console.log("Scraping page for", recordName,"...");
-        await page.screenshot({ path: path + "6-scraping-page.png" });
-        uploadFile(
-          path + "6-scraping-page.png",
-          "6-scraping-page.png",
-          folderName
-        );
+
 
         let headers = await page.$$eval(
           "grid-column-header > .header-contents > div",
@@ -201,8 +180,6 @@ async function scrapePage(recordName) {
         console.error("ERROR CAUGHT:" + error);
         throw error;
       } finally {
-        await page.screenshot({ path: path + "8-finished.png" });
-        uploadFile(path + "8-finished.png", "8-finished.png", folderName);
         await page.close();
       }
     });
