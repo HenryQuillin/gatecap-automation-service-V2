@@ -17,17 +17,54 @@ var base = new Airtable({
   apiKey,
 }).base("appKfm9gouHkcTC42");
 
+
+
+const Queue = require('better-queue');
+
+
+// ...
+
+// queue.js
+
+
+const getInfoQueue = new Queue(getInfo, {
+  concurrent: 1, // process tasks one at a time
+  maxRetries: 1, // attempt each task twice before giving up
+});
+
+
+
+
+async function getInfoWrapper(req, res) {
+  // Add a job to the queue
+  getInfoQueue.push(req.body);
+
+  res.status(200).send("Request received. Attempting to scrape data for", req.body.newlyAddedRecordID, "...");
+  console.log("Request received. Attempting to scrape data for", req.body.newlyAddedRecordID, "...");
+}
+
+getInfoQueue.on('task_finish', function (taskId, result, stats){
+  console.log(`Task ${taskId} finished: ${result}`);
+  console.log(`Task ${taskId} stats:`, stats);
+})
+
+getInfoQueue.on('task_failed', function (taskId, err, stats){
+  console.log(`Task ${taskId} failed with error ${err}`);
+  console.log(`Task ${taskId} stats:`, stats);
+})
+
+
+
 // eslint-disable-next-line no-undef
 let path = process.env.PORT == null || process.env.PORT == "" ? "sc/" : "/sc/";
 
-async function getInfo(req, res) {
+async function getInfo(body, cb) {
   try {
-    let record = await base("Company Tracking").find(req.body.newlyAddedRecordID);
+    let record = await base("Company Tracking").find(body.newlyAddedRecordID);
     let recordName = record.fields["Name"];
     const permalink = await getUUID(recordName);
 
     const data1 = await getBasicInfo(permalink);
-    res.status(200).send("Request received. Attempting to scrape data for", recordName, "...");
     console.log("Request received. Attempting to scrape data for", recordName, "...");
 
     let retries = 2;
@@ -35,28 +72,30 @@ async function getInfo(req, res) {
     let err; 
     while (retries > 0) {
       try {
-        console.log("Attempt #", 3 - retries, " for", recordName);
+        console.log("Attempt #", (retries+1) - retries, " for", recordName);
         data2 = await scrapePage(recordName);
         break;
       } catch (error) {
         err = error;
         console.error("Scraping error:", error);
-        await updateAirtableErrorDetails(req.body.newlyAddedRecordID, error);
+        await updateAirtableErrorDetails(body.newlyAddedRecordID, error);
         retries--;
       }
     }
     if (retries === 0) {
       console.error("Max retries reached. Unable to scrape data.");
-      await updateAirtableWithError(req.body.newlyAddedRecordID, err);
+      await updateAirtableWithError(body.newlyAddedRecordID, err);
     }
 
     if (data2) {
       const data = { ...data1, ...data2 };
       console.log(data);
-      await updateAirtable(data, req.body.newlyAddedRecordID);
+      await updateAirtable(data, body.newlyAddedRecordID);
     }
+    cb(null, "done");
   } catch (error) {
     console.error("An error occurred:", error);
+    cb(error);
   }
 }
 
@@ -315,5 +354,5 @@ function getDate() {
 }
 
 module.exports = {
-  getInfo: getInfo,
+  getInfo: getInfoWrapper,
 };
