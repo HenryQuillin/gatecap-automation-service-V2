@@ -22,7 +22,7 @@ let path = process.env.PORT == null || process.env.PORT == "" ? "sc/" : "/sc/";
 
 async function getInfo(req, res) {
   try {
-    let record = await base("Deal Flow").find(req.body.newlyAddedRecordID);
+    let record = await base("Company Tracking").find(req.body.newlyAddedRecordID);
     let recordName = record.fields["Name"];
     const permalink = await getUUID(recordName);
 
@@ -249,7 +249,7 @@ async function getBasicInfo(permalink) {
 }
 
 async function updateAirtable(data, recordID) {
-  base("Deal Flow").update(
+  base("Company Tracking").update(
     [
       {
         id: recordID,
@@ -269,7 +269,7 @@ async function updateAirtable(data, recordID) {
 }
 async function updateAirtableWithError(recordID, error) {
   if(error.toString().includes("Wrong company scraped")){
-    base("Deal Flow").update([
+    base("Company Tracking").update([
       {
         id: recordID,
         fields: {
@@ -278,7 +278,7 @@ async function updateAirtableWithError(recordID, error) {
       },
     ]);
   } else {
-    base("Deal Flow").update([
+    base("Company Tracking").update([
       {
         id: recordID,
         fields: {
@@ -289,7 +289,7 @@ async function updateAirtableWithError(recordID, error) {
   }
 }
 async function updateAirtableErrorDetails(recordID, error) {
-  base("Deal Flow").update([
+  base("Company Tracking").update([
     {
       id: recordID,
       fields: {
