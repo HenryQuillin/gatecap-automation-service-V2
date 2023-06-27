@@ -63,7 +63,8 @@ async function getInfo(body, cb) {
   try {
     let record = await base("Company Tracking").find(body.newlyAddedRecordID);
     let recordName = record.fields["Name"];
-    const permalink = await getUUID(recordName);
+    const permalink = await getUUID(recordName, record);
+
 
     const data1 = await getBasicInfo(permalink);
     console.log("Request received. Attempting to scrape data for", recordName, "...");
@@ -74,7 +75,7 @@ async function getInfo(body, cb) {
     while (retries > 0) {
       try {
         console.log("Attempt #", (retries+1) - retries, " for", recordName);
-        data2 = await scrapePage(recordName);
+        data2 = await scrapePage(recordName, record);
         break;
       } catch (error) {
         err = error;
@@ -100,7 +101,7 @@ async function getInfo(body, cb) {
   }
 }
 
-async function scrapePage(recordName) {
+async function scrapePage(recordName, record) {
   const folderName = getDate();
 
   puppeteer.use(pluginStealth());
@@ -184,6 +185,10 @@ async function scrapePage(recordName) {
 
 
         let rowNumber = await getRowNumber(page, recordName);
+        if (!rowNumber) {
+          updateAirtableWithCompanyNotFoundError(record.id); 
+          return;
+        }
 
         console.log("Row Number: ", rowNumber); 
          
@@ -221,7 +226,7 @@ async function scrapePage(recordName) {
     });
 }
 
-async function getUUID(name) {
+async function getUUID(name, record) {
   let config = {
     method: "get",
     maxBodyLength: Infinity,
@@ -235,6 +240,11 @@ async function getUUID(name) {
 
   try {
     let response = await axios.request(config);
+    const res = response.data.entities[0].identifier.permalink; 
+    if (compareName(res, name) == false) {
+      updateAirtableWithCompanyNotFoundError(record.id);
+      return null;
+    }
     return response.data.entities[0].identifier.permalink;
   } catch (error) {
     console.error(error);
@@ -263,7 +273,7 @@ async function getBasicInfo(permalink) {
       (data.properties.twitter && data.properties.twitter.value) || "—";
     let description = data.properties.short_description || "—";
     let dataToReturn = {
-      "Website URL": websiteUrl,
+      "Website": websiteUrl,
       "Logo URL": imageUrl,
       Linkedin: linkedin,
       Facebook: facebook,
@@ -356,6 +366,17 @@ async function updateAirtableWithError(recordID, error) {
       },
     ]);
   }
+}
+async function updateAirtableWithCompanyNotFoundError(recordID) {
+
+    base("Company Tracking").update([
+      {
+        id: recordID,
+        fields: {
+          "Scraping Status": "Not found on Crunchbase",
+        },
+      },
+    ]);
 }
 async function updateAirtableErrorDetails(recordID, error) {
   base("Company Tracking").update([
