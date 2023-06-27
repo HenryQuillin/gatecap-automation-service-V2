@@ -13,10 +13,7 @@ const pluginStealth = require("puppeteer-extra-plugin-stealth");
 const apiKey = process.env.AIRTABLE_API_KEY;
 
 
-var base = new Airtable({
-  apiKey:
-  apiKey,
-}).base("appKfm9gouHkcTC42");
+
 
 
 
@@ -36,12 +33,14 @@ const getInfoQueue = new Queue(getInfo, {
 
 
 
+
+
 async function getInfoWrapper(req, res) {
   // Add a job to the queue
   getInfoQueue.push(req.body);
 
-  res.status(200).send("Request received. Attempting to scrape data for", req.body.newlyAddedRecordID, "...");
-  console.log("Request received. Attempting to scrape data for", req.body.newlyAddedRecordID, "...");
+  res.status(200).send("Request received. Attempting to scrape data");
+  console.log("Request received. Attempting to scrape data for", "...");
 }
 
 getInfoQueue.on('task_finish', function (taskId, result, stats){
@@ -54,45 +53,32 @@ getInfoQueue.on('task_failed', function (taskId, err, stats){
   console.log(`Task ${taskId} stats:`, stats);
 })
 
-
+var base = new Airtable({
+  apiKey:
+  apiKey,
+}).base("appKfm9gouHkcTC42");
 
 // eslint-disable-next-line no-undef
 let path = process.env.PORT == null || process.env.PORT == "" ? "sc/" : "/sc/";
 
 async function getInfo(body, cb) {
   try {
-    let record = await base("Company Tracking").find(body.newlyAddedRecordID);
-    let recordName = record.fields["Name"];
-    const permalink = await getUUID(recordName);
-
-    const data1 = await getBasicInfo(permalink);
-    console.log("Request received. Attempting to scrape data for", recordName, "...");
 
     let retries = 2;
-    let data2 = null;
-    let err; 
     while (retries > 0) {
       try {
-        console.log("Attempt #", (retries+1) - retries, " for", recordName);
-        data2 = await scrapePage(recordName);
+        console.log("Attempt #", (retries+1) - retries);
+        await loginToCrunchbase();
         break;
       } catch (error) {
-        err = error;
-        console.error("Scraping error:", error);
-        await updateAirtableErrorDetails(body.newlyAddedRecordID, error);
+        console.error("Error logging in:", error);
         retries--;
       }
     }
     if (retries === 0) {
       console.error("Max retries reached. Unable to scrape data.");
-      await updateAirtableWithError(body.newlyAddedRecordID, err);
     }
 
-    if (data2) {
-      const data = { ...data1, ...data2 };
-      console.log(data);
-      await updateAirtable(data, body.newlyAddedRecordID);
-    }
     cb(null, "done");
   } catch (error) {
     console.error("An error occurred:", error);
@@ -100,18 +86,22 @@ async function getInfo(body, cb) {
   }
 }
 
-async function scrapePage(recordName) {
+async function loginToCrunchbase() {
   const folderName = getDate();
+
+  const records = await base("Company Tracking").select({
+    view: "Get Info Batch Queue",
+  }).all();
+
+
 
   puppeteer.use(pluginStealth());
   return puppeteer
     .launch({
       headless: "new",
-      // slowMo: 250,
       args: [
         "--disable-setuid-sandbox",
         "--no-sandbox",
-        // "--proxy-server=us-pr.oxylabs.io:7777",
         "--proxy-server=us-pr.oxylabs.io:10000",
       ],
     })
@@ -131,7 +121,7 @@ async function scrapePage(recordName) {
         waitUntil: "load",
       });
 
-      console.log("at login for ", recordName);
+      console.log("at login");
 
       try {
         await page.waitForSelector("#mat-input-5", { timeout: 10000 });
@@ -144,70 +134,18 @@ async function scrapePage(recordName) {
           page.click(".login"),
         ]);
 
-        console.log("logged in for", recordName);
+        console.log("logged in");
 
         await page.goto(
           "https://www.crunchbase.com/discover/saved/view-for-automation/2fe3a89b-0a52-4f11-b3e7-b7ec2777f00a"
         );
 
-        console.log("at company discover page for ", recordName);
+        console.log("at company discover page");
+
+        return await scrapeCompanies(page, records);
 
 
-        await page.type("#mat-input-1", recordName);
-
-        console.log("typed company name for ", recordName);
-
-
-        await page.keyboard.press("Enter");
-
-        console.log("pressed enter for ", recordName);
-
-        await page.waitForSelector("mat-progress-bar", { hidden: true });
-
-        console.log("Scraping page for", recordName,"...");
-
-
-        let headers = await page.$$eval(
-          "grid-column-header > .header-contents > div",
-          (elements) => {
-            let validElements = elements
-              .filter((e) => e.innerText)
-              .map((e) => e.innerText);
-
-            if (validElements[validElements.length - 1] === "ADD COLUMN") {
-              validElements.pop();
-            }
-
-            return validElements;
-          }
-        );
-
-
-        let rowNumber = await getRowNumber(page, recordName);
-
-        console.log("Row Number: ", rowNumber); 
-         
-
-        let contents = await page.$$eval(
-          `grid-row:nth-of-type(${rowNumber}) > grid-cell > div > field-formatter`,
-          (elements) => elements.map((e) => e.innerText)
-        );
-
-
-        let res = {};
-        for (let i = 0; i < headers.length; i++) {
-          res[headers[i]] = contents[i];
-        }
-        if (
-          compareName(res["Organization Name"], recordName) == false)  {
-          console.error(
-            `Wrong company scraped: Scraped ${res["Organization Name"]} but expected ${recordName}`
-          );
-          throw new Error(
-            `Wrong company scraped: Scraped ${res["Organization Name"]} but expected ${recordName}`
-          );
-        }
-        return res;
+ 
       } catch (error) {
         await page.screenshot({ path: path + "7-catch-block.png" });
         uploadFile(path + "7-catch-block.png", "7-catch-block.png", folderName);
@@ -220,6 +158,87 @@ async function scrapePage(recordName) {
       }
     });
 }
+
+
+async function scrapeCompanies(page, records) {
+  for (let i = 0; i < records.length; i++) {
+    const record = records[i];
+    const recordName = record.fields["Name"];
+
+    const permalink = await getUUID(recordName);
+
+    const basicInfo = await getBasicInfo(permalink);
+    console.log("Scraping for ", recordName);
+    
+    try {
+  
+  
+      await page.type("#mat-input-1", recordName);
+  
+      console.log("typed company name for ", recordName);
+  
+  
+      await page.keyboard.press("Enter");
+  
+      console.log("pressed enter for ", recordName);
+  
+      await page.waitForSelector("mat-progress-bar", { hidden: true });
+  
+      console.log("Collecting info for", recordName,"...");
+  
+  
+      let headers = await page.$$eval(
+        "grid-column-header > .header-contents > div",
+        (elements) => {
+          let validElements = elements
+            .filter((e) => e.innerText)
+            .map((e) => e.innerText);
+  
+          if (validElements[validElements.length - 1] === "ADD COLUMN") {
+            validElements.pop();
+          }
+  
+          return validElements;
+        }
+      );
+  
+  
+      let rowNumber = await getRowNumber(page, recordName);
+  
+      console.log("Row Number: ", rowNumber); 
+       
+  
+      let contents = await page.$$eval(
+        `grid-row:nth-of-type(${rowNumber}) > grid-cell > div > field-formatter`,
+        (elements) => elements.map((e) => e.innerText)
+      );
+  
+  
+      let scrapedInfo = {};
+      for (let i = 0; i < headers.length; i++) {
+        scrapedInfo[headers[i]] = contents[i];
+      }
+      if (
+        compareName(scrapedInfo["Organization Name"], recordName) == false)  {
+        console.error(
+          `Wrong company scraped: Scraped ${scrapedInfo["Organization Name"]} but expected ${recordName}`
+        );
+        throw new Error(
+          `Wrong company scraped: Scraped ${scrapedInfo["Organization Name"]} but expected ${recordName}`
+        );
+      }
+      const res = { ...basicInfo, ...scrapedInfo };
+
+      await updateAirtable(res, record.id);
+      await page.click('div.filter.filter-activated.ng-star-inserted > advanced-filter > filter-multi-text > chips-container > chip > div > button > span.mat-mdc-focus-indicator');
+
+    } catch (error) {
+      console.error(`Error scraping ${recordName}:`, error);
+      continue;
+    }
+  }
+}
+
 
 async function getUUID(name) {
   let config = {
@@ -336,37 +355,6 @@ async function updateAirtable(data, recordID) {
     }
   );
 }
-async function updateAirtableWithError(recordID, error) {
-  if(error.toString().includes("Wrong company scraped")){
-    base("Company Tracking").update([
-      {
-        id: recordID,
-        fields: {
-          "Scraping Status": "Not found on Crunchbase",
-        },
-      },
-    ]);
-  } else {
-    base("Company Tracking").update([
-      {
-        id: recordID,
-        fields: {
-          "Scraping Status": "Error",
-        },
-      },
-    ]);
-  }
-}
-async function updateAirtableErrorDetails(recordID, error) {
-  base("Company Tracking").update([
-    {
-      id: recordID,
-      fields: {
-        "Error Details": error.toString(),
-      },
-    },
-  ]);
-}
 
 function getDate() {
   const date = moment().tz("America/Chicago");
@@ -384,5 +372,5 @@ function getDate() {
 }
 
 module.exports = {
-  getInfo: getInfoWrapper,
+  getInfoAll: getInfoWrapper,
 };

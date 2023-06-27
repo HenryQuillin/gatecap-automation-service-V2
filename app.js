@@ -3,6 +3,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const { getArticles } = require("./getArticles");
 const { getInfo } = require("./getInfo");
+const { getInfoAll } = require("./getInfoAll");
 
 
 const app = express();
@@ -23,6 +24,11 @@ app.post("/extract", (req, res) => {
 app.post("/getinfo", async (req, res) => {
   console.log("Request received.");
   getInfo(req, res);
+
+});
+app.post("/getinfoall", async (req, res) => {
+  console.log("Request received.");
+  getInfoAll(req, res);
 
 });
 
