@@ -181,8 +181,14 @@ async function scrapePage(recordName) {
           }
         );
 
+
+        let rowNumber = await getRowNumber(page, recordName);
+
+        console.log("Row Number: ", rowNumber); 
+         
+
         let contents = await page.$$eval(
-          "grid-row:first-of-type > grid-cell > div > field-formatter",
+          `grid-row:nth-of-type(${rowNumber}) > grid-cell > div > field-formatter`,
           (elements) => elements.map((e) => e.innerText)
         );
 
@@ -192,17 +198,7 @@ async function scrapePage(recordName) {
           res[headers[i]] = contents[i];
         }
         if (
-          res["Organization Name"]
-            .toLowerCase()
-            .replace(/\s/g, "")
-            .replace(/[^\w\s]|_/g, "")
-            .replace(/\s+/g, "") !==
-          recordName
-            .toLowerCase()
-            .replace(/\s/g, "")
-            .replace(/[^\w\s]|_/g, "")
-            .replace(/\s+/g, "")
-        )  {
+          compareName(res["Organization Name"], recordName) == false)  {
           console.error(
             `Wrong company scraped: Scraped ${res["Organization Name"]} but expected ${recordName}`
           );
@@ -286,6 +282,39 @@ async function getBasicInfo(permalink) {
     console.log("Failed the crunchbase.com/api/v4/entities request" + error);
   }
 }
+
+function compareName(s1, s2) {
+  if (
+   s1
+      .toLowerCase()
+      .replace(/\s/g, "")
+      .replace(/[^\w\s]|_/g, "")
+      .replace(/\s+/g, "") !==
+    s2
+      .toLowerCase()
+      .replace(/\s/g, "")
+      .replace(/[^\w\s]|_/g, "")
+      .replace(/\s+/g, "")
+  ) { return false; } else {
+    return true;
+  }
+}
+
+
+async function getRowNumber(page, companyName) {
+  for (let i = 1; i <= 10; i++) {
+    const selector = `grid-row:nth-of-type(${i}) > grid-cell > div > field-formatter:nth-of-type(1)`;
+    const element = await page.$(selector);
+    if (element) {
+      const innerText = await page.evaluate((el) => el.innerText, element);
+      if (compareName(innerText, companyName)) {
+        return i; // Match found
+      }
+    }
+  }
+  return false; // No match found within the range
+}
+
 
 async function updateAirtable(data, recordID) {
   base("Company Tracking").update(
