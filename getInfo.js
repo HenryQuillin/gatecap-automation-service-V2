@@ -343,7 +343,7 @@ async function updateAirtableWithError(recordID, error) {
       {
         id: recordID,
         fields: {
-          "Scraping Status": "Not found on Crunchbase",
+          "Scraping Status": "Not on Crunchbase",
         },
       },
     ]);
