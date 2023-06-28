@@ -1,39 +1,30 @@
 const Airtable = require("airtable");
-const axios = require("axios");
+// const axios = require("axios");
 const puppeteer = require("puppeteer-extra");
 require("dotenv").config();
 const { uploadFile } = require("./uploadFile");
 const moment = require("moment-timezone");
+const {
+  updateAirtableWithCompanyNotFoundError,
+  updateAirtableWithScrapingStatus,
+} = require("./helpers");
 
 // Add stealth plugin and use defaults
 const pluginStealth = require("puppeteer-extra-plugin-stealth");
 
-
 // eslint-disable-next-line no-undef
 const apiKey = process.env.AIRTABLE_API_KEY;
 
-
-
-
-
-
-const Queue = require('better-queue');
-
+const Queue = require("better-queue");
 
 // ...
 
 // queue.js
 
-
 const getInfoQueue = new Queue(getInfo, {
   concurrent: 1, // process tasks one at a time
   maxRetries: 1, // attempt each task twice before giving up
 });
-
-
-
-
-
 
 async function getInfoWrapper(req, res) {
   // Add a job to the queue
@@ -43,19 +34,18 @@ async function getInfoWrapper(req, res) {
   console.log("Request received. Attempting to scrape data for", "...");
 }
 
-getInfoQueue.on('task_finish', function (taskId, result, stats){
+getInfoQueue.on("task_finish", function (taskId, result, stats) {
   console.log(`Task ${taskId} finished: ${result}`);
   console.log(`Task ${taskId} stats:`, stats);
-})
+});
 
-getInfoQueue.on('task_failed', function (taskId, err, stats){
+getInfoQueue.on("task_failed", function (taskId, err, stats) {
   console.log(`Task ${taskId} failed with error ${err}`);
   console.log(`Task ${taskId} stats:`, stats);
-})
+});
 
 var base = new Airtable({
-  apiKey:
-  apiKey,
+  apiKey: apiKey,
 }).base("appKfm9gouHkcTC42");
 
 // eslint-disable-next-line no-undef
@@ -63,11 +53,10 @@ let path = process.env.PORT == null || process.env.PORT == "" ? "sc/" : "/sc/";
 
 async function getInfo(body, cb) {
   try {
-
     let retries = 2;
     while (retries > 0) {
       try {
-        console.log("Attempt #", (retries+1) - retries);
+        console.log("Attempt #", retries + 1 - retries);
         await loginToCrunchbase();
         break;
       } catch (error) {
@@ -89,16 +78,16 @@ async function getInfo(body, cb) {
 async function loginToCrunchbase() {
   const folderName = getDate();
 
-  const records = await base("Company Tracking").select({
-    view: "Get Info Batch Queue",
-  }).all();
-
-
+  const records = await base("Company Tracking")
+    .select({
+      view: "Get Info Batch Queue",
+    })
+    .all();
 
   puppeteer.use(pluginStealth());
   return puppeteer
     .launch({
-      headless: "new",
+      headless: false,
       args: [
         "--disable-setuid-sandbox",
         "--no-sandbox",
@@ -143,9 +132,6 @@ async function loginToCrunchbase() {
         console.log("at company discover page");
 
         return await scrapeCompanies(page, records);
-
-
- 
       } catch (error) {
         await page.screenshot({ path: path + "7-catch-block.png" });
         uploadFile(path + "7-catch-block.png", "7-catch-block.png", folderName);
@@ -159,67 +145,72 @@ async function loginToCrunchbase() {
     });
 }
 
-
 async function scrapeCompanies(page, records) {
   for (let i = 0; i < records.length; i++) {
     const record = records[i];
     const recordName = record.fields["Name"];
 
-    const permalink = await getUUID(recordName);
-
-    const basicInfo = await getBasicInfo(permalink);
-    console.log("Scraping for ", recordName);
-    
     try {
-  
-  
+      await updateAirtableWithScrapingStatus(base, record.id, "In Progress");
+
+      const companySearchTag = await page.$('div.filter.filter-activated.ng-star-inserted > advanced-filter > filter-multi-text > chips-container > chip > div > button > span.mat-mdc-focus-indicator');
+      companySearchTag ? await companySearchTag.click() : null;
+
       await page.type("#mat-input-1", recordName);
-  
+
       console.log("typed company name for ", recordName);
-  
-  
+
       await page.keyboard.press("Enter");
-  
+
       console.log("pressed enter for ", recordName);
-  
+
       await page.waitForSelector("mat-progress-bar", { hidden: true });
-  
-      console.log("Collecting info for", recordName,"...");
-  
-  
+
+      console.log("Collecting info for", recordName, "...");
+
       let headers = await page.$$eval(
         "grid-column-header > .header-contents > div",
         (elements) => {
           let validElements = elements
             .filter((e) => e.innerText)
             .map((e) => e.innerText);
-  
+
           if (validElements[validElements.length - 1] === "ADD COLUMN") {
             validElements.pop();
           }
-  
+
           return validElements;
         }
       );
-  
-  
+
       let rowNumber = await getRowNumber(page, recordName);
-  
-      console.log("Row Number: ", rowNumber); 
-       
-  
+      if (!rowNumber) {
+        updateAirtableWithCompanyNotFoundError(base, record.id);
+        continue;
+      }
+
+      console.log("Row Number: ", rowNumber);
+
+      const logoURL = await getLogoURL(page, rowNumber);
+      const Logo = [
+        {
+          url: logoURL,
+          filename: recordName + ".png",
+        },
+      ];
+
+      console.log("Logo URL: ", logoURL);
+
       let contents = await page.$$eval(
         `grid-row:nth-of-type(${rowNumber}) > grid-cell > div > field-formatter`,
         (elements) => elements.map((e) => e.innerText)
       );
-  
-  
+
       let scrapedInfo = {};
       for (let i = 0; i < headers.length; i++) {
         scrapedInfo[headers[i]] = contents[i];
       }
-      if (
-        compareName(scrapedInfo["Organization Name"], recordName) == false)  {
+      if (compareName(scrapedInfo["Organization Name"], recordName) == false) {
         console.error(
           `Wrong company scraped: Scraped ${scrapedInfo["Organization Name"]} but expected ${recordName}`
         );
@@ -227,10 +218,8 @@ async function scrapeCompanies(page, records) {
           `Wrong company scraped: Scraped ${scrapedInfo["Organization Name"]} but expected ${recordName}`
         );
       }
-      const res = { ...basicInfo, ...scrapedInfo };
-
-      await updateAirtable(res, record.id);
-      await page.click('div.filter.filter-activated.ng-star-inserted > advanced-filter > filter-multi-text > chips-container > chip > div > button > span.mat-mdc-focus-indicator');
+      scrapedInfo = { ...scrapedInfo, Logo };
+      await updateAirtable(scrapedInfo, record.id);
 
     } catch (error) {
       console.error(`Error scraping ${recordName}:`, error);
@@ -239,73 +228,18 @@ async function scrapeCompanies(page, records) {
   }
 }
 
-
-async function getUUID(name) {
-  let config = {
-    method: "get",
-    maxBodyLength: Infinity,
-    url: `https://api.crunchbase.com/api/v4/autocompletes?query=${encodeURIComponent(
-      name
-    )}&collection_ids=organizations&limit=1`,
-    headers: {
-      "X-cb-user-key": "9011e1fdbe5146865162bb45b036aa92",
-    },
-  };
-
-  try {
-    let response = await axios.request(config);
-    return response.data.entities[0].identifier.permalink;
-  } catch (error) {
-    console.error(error);
-  }
-}
-async function getBasicInfo(permalink) {
-  let config = {
-    method: "get",
-    maxBodyLength: Infinity,
-    url: `https://api.crunchbase.com/api/v4/entities/organizations/${permalink}?field_ids=facebook%2Cwebsite_url%2Ctwitter%2Clinkedin%2Cshort_description%2Cimage_url`,
-    headers: {
-      "X-cb-user-key": "9011e1fdbe5146865162bb45b036aa92",
-      Cookie: "cid=CiheL2R/ki9+eQAaGtHbAg==",
-    },
-  };
-  try {
-    const response = await axios.request(config);
-    const data = response.data;
-    let websiteUrl = data.properties.website_url || "—";
-    let imageUrl = data.properties.image_url || "";
-    let linkedin =
-      (data.properties.linkedin && data.properties.linkedin.value) || "—";
-    let facebook =
-      (data.properties.facebook && data.properties.facebook.value) || "—";
-    let twitter =
-      (data.properties.twitter && data.properties.twitter.value) || "—";
-    let description = data.properties.short_description || "—";
-    let dataToReturn = {
-      "Website URL": websiteUrl,
-      "Logo URL": imageUrl,
-      Linkedin: linkedin,
-      Facebook: facebook,
-      Twitter: twitter,
-      Description: description,
-      Logo: [
-        {
-          url: imageUrl,
-          filename: "Logo",
-        },
-      ],
-      "Diligence Status": "Pending",
-      "Scraping Status": "Basic Info Only",
-    };
-    return dataToReturn;
-  } catch (error) {
-    console.log("Failed the crunchbase.com/api/v4/entities request" + error);
-  }
+async function getLogoURL(page, rowNumber) {
+  return await page.$$eval(
+    `grid-body > div > grid-row:nth-child(${
+      rowNumber + 1
+    }) > grid-cell.sticky-column-2.column-id-identifier.ng-star-inserted > div > field-formatter > identifier-formatter > a > div > identifier-image > div > img`,
+    (elements) => elements.map((e) => e.src)[0]
+  );
 }
 
 function compareName(s1, s2) {
   if (
-   s1
+    s1
       .toLowerCase()
       .replace(/\s/g, "")
       .replace(/[^\w\s]|_/g, "")
@@ -315,11 +249,12 @@ function compareName(s1, s2) {
       .replace(/\s/g, "")
       .replace(/[^\w\s]|_/g, "")
       .replace(/\s+/g, "")
-  ) { return false; } else {
+  ) {
+    return false;
+  } else {
     return true;
   }
 }
-
 
 async function getRowNumber(page, companyName) {
   for (let i = 1; i <= 10; i++) {
@@ -334,7 +269,6 @@ async function getRowNumber(page, companyName) {
   }
   return false; // No match found within the range
 }
-
 
 async function updateAirtable(data, recordID) {
   base("Company Tracking").update(
@@ -374,3 +308,66 @@ function getDate() {
 module.exports = {
   getInfoAll: getInfoWrapper,
 };
+
+// async function getUUID(name) {
+//   let config = {
+//     method: "get",
+//     maxBodyLength: Infinity,
+//     url: `https://api.crunchbase.com/api/v4/autocompletes?query=${encodeURIComponent(
+//       name
+//     )}&collection_ids=organizations&limit=1`,
+//     headers: {
+//       "X-cb-user-key": "9011e1fdbe5146865162bb45b036aa92",
+//     },
+//   };
+
+//   try {
+//     let response = await axios.request(config);
+//     return response.data.entities[0].identifier.permalink;
+//   } catch (error) {
+//     console.error(error);
+//   }
+// }
+// async function getBasicInfo(permalink) {
+//   let config = {
+//     method: "get",
+//     maxBodyLength: Infinity,
+//     url: `https://api.crunchbase.com/api/v4/entities/organizations/${permalink}?field_ids=facebook%2Cwebsite_url%2Ctwitter%2Clinkedin%2Cshort_description%2Cimage_url`,
+//     headers: {
+//       "X-cb-user-key": "9011e1fdbe5146865162bb45b036aa92",
+//       Cookie: "cid=CiheL2R/ki9+eQAaGtHbAg==",
+//     },
+//   };
+//   try {
+//     const response = await axios.request(config);
+//     const data = response.data;
+//     let websiteUrl = data.properties.website_url || "—";
+//     let imageUrl = data.properties.image_url || "";
+//     let linkedin =
+//       (data.properties.linkedin && data.properties.linkedin.value) || "—";
+//     let facebook =
+//       (data.properties.facebook && data.properties.facebook.value) || "—";
+//     let twitter =
+//       (data.properties.twitter && data.properties.twitter.value) || "—";
+//     let description = data.properties.short_description || "—";
+//     let dataToReturn = {
+//       "Website URL": websiteUrl,
+//       "Logo URL": imageUrl,
+//       Linkedin: linkedin,
+//       Facebook: facebook,
+//       Twitter: twitter,
+//       Description: description,
+// Logo: [
+//   {
+//     url: imageUrl,
+//     filename: "Logo",
+//   },
+// ],
+//       "Diligence Status": "Pending",
+//       "Scraping Status": "Basic Info Only",
+//     };
+//     return dataToReturn;
+//   } catch (error) {
+//     console.log("Failed the crunchbase.com/api/v4/entities request" + error);
+//   }
+// }

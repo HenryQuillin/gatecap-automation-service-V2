@@ -4,57 +4,57 @@ const puppeteer = require("puppeteer-extra");
 require("dotenv").config();
 const { uploadFile } = require("./uploadFile");
 const moment = require("moment-timezone");
+const { updateAirtableWithCompanyNotFoundError } = require("./helpers");
 
 // Add stealth plugin and use defaults
 const pluginStealth = require("puppeteer-extra-plugin-stealth");
 
-
 // eslint-disable-next-line no-undef
 const apiKey = process.env.AIRTABLE_API_KEY;
 
-
 var base = new Airtable({
-  apiKey:
-  apiKey,
+  apiKey: apiKey,
 }).base("appKfm9gouHkcTC42");
 
-
-
-const Queue = require('better-queue');
-
-
-// ...
-
-// queue.js
-
+const Queue = require("better-queue");
 
 const getInfoQueue = new Queue(getInfo, {
   concurrent: 1, // process tasks one at a time
   maxRetries: 1, // attempt each task twice before giving up
 });
 
-
-
+const headers = {
+  // eslint-disable-next-line no-undef
+  "X-cb-user-key": process.env.CB_USER_KEY,
+};
 
 async function getInfoWrapper(req, res) {
   // Add a job to the queue
   getInfoQueue.push(req.body);
 
-  res.status(200).send("Request received. Attempting to scrape data for", req.body.newlyAddedRecordID, "...");
-  console.log("Request received. Attempting to scrape data for", req.body.newlyAddedRecordID, "...");
+  res
+    .status(200)
+    .send(
+      "Request received. Attempting to scrape data for",
+      req.body.newlyAddedRecordID,
+      "..."
+    );
+  console.log(
+    "Request received. Attempting to scrape data for",
+    req.body.newlyAddedRecordID,
+    "..."
+  );
 }
 
-getInfoQueue.on('task_finish', function (taskId, result, stats){
+getInfoQueue.on("task_finish", function (taskId, result, stats) {
   console.log(`Task ${taskId} finished: ${result}`);
   console.log(`Task ${taskId} stats:`, stats);
-})
+});
 
-getInfoQueue.on('task_failed', function (taskId, err, stats){
+getInfoQueue.on("task_failed", function (taskId, err, stats) {
   console.log(`Task ${taskId} failed with error ${err}`);
   console.log(`Task ${taskId} stats:`, stats);
-})
-
-
+});
 
 // eslint-disable-next-line no-undef
 let path = process.env.PORT == null || process.env.PORT == "" ? "sc/" : "/sc/";
@@ -65,16 +65,19 @@ async function getInfo(body, cb) {
     let recordName = record.fields["Name"];
     const permalink = await getUUID(recordName, record);
 
-
     const data1 = await getBasicInfo(permalink);
-    console.log("Request received. Attempting to scrape data for", recordName, "...");
+    console.log(
+      "Request received. Attempting to scrape data for",
+      recordName,
+      "..."
+    );
 
     let retries = 2;
     let data2 = null;
-    let err; 
+    let err;
     while (retries > 0) {
       try {
-        console.log("Attempt #", (retries+1) - retries, " for", recordName);
+        console.log("Attempt #", retries + 1 - retries, " for", recordName);
         data2 = await scrapePage(recordName, record);
         break;
       } catch (error) {
@@ -153,11 +156,9 @@ async function scrapePage(recordName, record) {
 
         console.log("at company discover page for ", recordName);
 
-
         await page.type("#mat-input-1", recordName);
 
         console.log("typed company name for ", recordName);
-
 
         await page.keyboard.press("Enter");
 
@@ -165,8 +166,7 @@ async function scrapePage(recordName, record) {
 
         await page.waitForSelector("mat-progress-bar", { hidden: true });
 
-        console.log("Scraping page for", recordName,"...");
-
+        console.log("Scraping page for", recordName, "...");
 
         let headers = await page.$$eval(
           "grid-column-header > .header-contents > div",
@@ -183,28 +183,24 @@ async function scrapePage(recordName, record) {
           }
         );
 
-
         let rowNumber = await getRowNumber(page, recordName);
         if (!rowNumber) {
-          updateAirtableWithCompanyNotFoundError(record.id); 
+          updateAirtableWithCompanyNotFoundError(base, record.id);
           return;
         }
 
-        console.log("Row Number: ", rowNumber); 
-         
+        console.log("Row Number: ", rowNumber);
 
         let contents = await page.$$eval(
           `grid-row:nth-of-type(${rowNumber}) > grid-cell > div > field-formatter`,
           (elements) => elements.map((e) => e.innerText)
         );
 
-
         let res = {};
         for (let i = 0; i < headers.length; i++) {
           res[headers[i]] = contents[i];
         }
-        if (
-          compareName(res["Organization Name"], recordName) == false)  {
+        if (compareName(res["Organization Name"], recordName) == false) {
           console.error(
             `Wrong company scraped: Scraped ${res["Organization Name"]} but expected ${recordName}`
           );
@@ -233,14 +229,12 @@ async function getUUID(name, record) {
     url: `https://api.crunchbase.com/api/v4/autocompletes?query=${encodeURIComponent(
       name
     )}&collection_ids=organizations&limit=1`,
-    headers: {
-      "X-cb-user-key": "9011e1fdbe5146865162bb45b036aa92",
-    },
+    headers: headers,
   };
 
   try {
     let response = await axios.request(config);
-    const res = response.data.entities[0].identifier.permalink; 
+    const res = response.data.entities[0].identifier.permalink;
     if (compareName(res, name) == false) {
       updateAirtableWithCompanyNotFoundError(record.id);
       return null;
@@ -255,10 +249,7 @@ async function getBasicInfo(permalink) {
     method: "get",
     maxBodyLength: Infinity,
     url: `https://api.crunchbase.com/api/v4/entities/organizations/${permalink}?field_ids=facebook%2Cwebsite_url%2Ctwitter%2Clinkedin%2Cshort_description%2Cimage_url`,
-    headers: {
-      "X-cb-user-key": "9011e1fdbe5146865162bb45b036aa92",
-      Cookie: "cid=CiheL2R/ki9+eQAaGtHbAg==",
-    },
+    headers: headers,
   };
   try {
     const response = await axios.request(config);
@@ -273,7 +264,7 @@ async function getBasicInfo(permalink) {
       (data.properties.twitter && data.properties.twitter.value) || "—";
     let description = data.properties.short_description || "—";
     let dataToReturn = {
-      "Website": websiteUrl,
+      Website: websiteUrl,
       "Logo URL": imageUrl,
       Linkedin: linkedin,
       Facebook: facebook,
@@ -296,7 +287,7 @@ async function getBasicInfo(permalink) {
 
 function compareName(s1, s2) {
   if (
-   s1
+    s1
       .toLowerCase()
       .replace(/\s/g, "")
       .replace(/[^\w\s]|_/g, "")
@@ -306,11 +297,12 @@ function compareName(s1, s2) {
       .replace(/\s/g, "")
       .replace(/[^\w\s]|_/g, "")
       .replace(/\s+/g, "")
-  ) { return false; } else {
+  ) {
+    return false;
+  } else {
     return true;
   }
 }
-
 
 async function getRowNumber(page, companyName) {
   for (let i = 1; i <= 10; i++) {
@@ -325,7 +317,6 @@ async function getRowNumber(page, companyName) {
   }
   return false; // No match found within the range
 }
-
 
 async function updateAirtable(data, recordID) {
   base("Company Tracking").update(
@@ -347,7 +338,7 @@ async function updateAirtable(data, recordID) {
   );
 }
 async function updateAirtableWithError(recordID, error) {
-  if(error.toString().includes("Wrong company scraped")){
+  if (error.toString().includes("Wrong company scraped")) {
     base("Company Tracking").update([
       {
         id: recordID,
@@ -367,17 +358,7 @@ async function updateAirtableWithError(recordID, error) {
     ]);
   }
 }
-async function updateAirtableWithCompanyNotFoundError(recordID) {
 
-    base("Company Tracking").update([
-      {
-        id: recordID,
-        fields: {
-          "Scraping Status": "Not found on Crunchbase",
-        },
-      },
-    ]);
-}
 async function updateAirtableErrorDetails(recordID, error) {
   base("Company Tracking").update([
     {
