@@ -211,7 +211,7 @@ async function scrapePage(recordName, record) {
         return res;
       } catch (error) {
         await page.screenshot({ path: path + "7-catch-block.png" });
-        uploadFile(path + "7-catch-block.png", "7-catch-block.png", folderName);
+        // uploadFile(path + "7-catch-block.png", "7-catch-block.png", folderName);
         console.log("PAGE H1:");
         console.log(await page.evaluate(() => document.title));
         console.error("ERROR CAUGHT:" + error);
