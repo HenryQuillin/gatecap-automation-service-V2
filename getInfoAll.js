@@ -113,10 +113,10 @@ async function loginToCrunchbase() {
       console.log("at login");
 
       try {
-        await page.waitForSelector("#mat-input-5", { timeout: 10000 });
-        await page.waitForSelector("#mat-input-6");
-        await page.type("#mat-input-5", "alfred@gate-cap.com");
-        await page.type("#mat-input-6", "KVVE@9810Fm6pKs4");
+        await page.waitForSelector("#mat-input-1", { timeout: 10000 });
+        await page.waitForSelector("#mat-input-2");
+        await page.type("#mat-input-1", "alfred@gate-cap.com");
+        await page.type("#mat-input-2", "KVVE@9810Fm6pKs4");
 
         await Promise.all([
           page.waitForNavigation({ waitUntil: "load" }),
@@ -153,7 +153,9 @@ async function scrapeCompanies(page, records) {
     try {
       await updateAirtableWithScrapingStatus(base, record.id, "In Progress");
 
-      const companySearchTag = await page.$('div.filter.filter-activated.ng-star-inserted > advanced-filter > filter-multi-text > chips-container > chip > div > button > span.mat-mdc-focus-indicator');
+      const companySearchTag = await page.$(
+        "div.filter.filter-activated.ng-star-inserted > advanced-filter > filter-multi-text > chips-container > chip > div > button > span.mat-mdc-focus-indicator"
+      );
       companySearchTag ? await companySearchTag.click() : null;
 
       await page.type("#mat-input-1", recordName);
@@ -220,7 +222,6 @@ async function scrapeCompanies(page, records) {
       }
       scrapedInfo = { ...scrapedInfo, Logo };
       await updateAirtable(scrapedInfo, record.id);
-
     } catch (error) {
       console.error(`Error scraping ${recordName}:`, error);
       continue;
@@ -257,7 +258,7 @@ function compareName(s1, s2) {
 }
 
 async function getRowNumber(page, companyName) {
-  for (let i = 1; i <= 10; i++) {
+  for (let i = 1; i <= 25; i++) {
     const selector = `grid-row:nth-of-type(${i}) > grid-cell > div > field-formatter:nth-of-type(1)`;
     const element = await page.$(selector);
     if (element) {
@@ -308,66 +309,3 @@ function getDate() {
 module.exports = {
   getInfoAll: getInfoWrapper,
 };
-
-// async function getUUID(name) {
-//   let config = {
-//     method: "get",
-//     maxBodyLength: Infinity,
-//     url: `https://api.crunchbase.com/api/v4/autocompletes?query=${encodeURIComponent(
-//       name
-//     )}&collection_ids=organizations&limit=1`,
-//     headers: {
-//       "X-cb-user-key": "9011e1fdbe5146865162bb45b036aa92",
-//     },
-//   };
-
-//   try {
-//     let response = await axios.request(config);
-//     return response.data.entities[0].identifier.permalink;
-//   } catch (error) {
-//     console.error(error);
-//   }
-// }
-// async function getBasicInfo(permalink) {
-//   let config = {
-//     method: "get",
-//     maxBodyLength: Infinity,
-//     url: `https://api.crunchbase.com/api/v4/entities/organizations/${permalink}?field_ids=facebook%2Cwebsite_url%2Ctwitter%2Clinkedin%2Cshort_description%2Cimage_url`,
-//     headers: {
-//       "X-cb-user-key": "9011e1fdbe5146865162bb45b036aa92",
-//       Cookie: "cid=CiheL2R/ki9+eQAaGtHbAg==",
-//     },
-//   };
-//   try {
-//     const response = await axios.request(config);
-//     const data = response.data;
-//     let websiteUrl = data.properties.website_url || "—";
-//     let imageUrl = data.properties.image_url || "";
-//     let linkedin =
-//       (data.properties.linkedin && data.properties.linkedin.value) || "—";
-//     let facebook =
-//       (data.properties.facebook && data.properties.facebook.value) || "—";
-//     let twitter =
-//       (data.properties.twitter && data.properties.twitter.value) || "—";
-//     let description = data.properties.short_description || "—";
-//     let dataToReturn = {
-//       "Website URL": websiteUrl,
-//       "Logo URL": imageUrl,
-//       Linkedin: linkedin,
-//       Facebook: facebook,
-//       Twitter: twitter,
-//       Description: description,
-// Logo: [
-//   {
-//     url: imageUrl,
-//     filename: "Logo",
-//   },
-// ],
-//       "Diligence Status": "Pending",
-//       "Scraping Status": "Basic Info Only",
-//     };
-//     return dataToReturn;
-//   } catch (error) {
-//     console.log("Failed the crunchbase.com/api/v4/entities request" + error);
-//   }
-// }

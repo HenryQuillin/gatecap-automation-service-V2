@@ -107,7 +107,7 @@ function getArticles(req, res) {
 
 const base = new Airtable({
   apiKey:
-    "pat6UUeva3HgsCP0B.08d49df5c164666ce8e2415f9a3e0800bb43afbf190450b4be31cd79bccd75fd",
+  process.env.AIRTABLE_API_KEY,
 }).base("appKfm9gouHkcTC42");
 function updateAirtable(articles) {
   articles.forEach((article) => {
