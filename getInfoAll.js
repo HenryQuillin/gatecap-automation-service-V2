@@ -87,7 +87,7 @@ async function loginToCrunchbase() {
   puppeteer.use(pluginStealth());
   return puppeteer
     .launch({
-      headless: false,
+      headless: "new",
       args: [
         "--disable-setuid-sandbox",
         "--no-sandbox",
