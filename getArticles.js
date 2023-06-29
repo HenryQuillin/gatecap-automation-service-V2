@@ -1,15 +1,19 @@
 const Airtable = require("airtable");
 const cheerio = require("cheerio");
-const stringSimilarity = require('string-similarity');
+const stringSimilarity = require("string-similarity");
 let table = "News Log";
-// eslint-disable-next-line no-undef
-// let port = process.env.PORT;
-// if (port == null || port == "") {
-//   table = "News Log - Dev";
-// }
 
+require("dotenv").config();
+
+//eslint-disable-next-line no-undef
+let port = process.env.PORT;
+if (port == null || port == "") {
+  table = "News Log - Dev";
+}
+const AIRTABLE_API_KEY = process.env.AIRTABLE_API_KEY;
 
 function getArticles(req, res) {
+  console.log(req.body);
   const alertEmailURL =
     "https://mail.google.com/mail/u/3/#inbox/" + req.body.alertEmailID;
   const html = req.body.html;
@@ -75,11 +79,17 @@ function getArticles(req, res) {
         .trim()
         .toLowerCase();
     }
-    let similarKey = getSimilarKey(groupedArticles, article.title, article.content_preview);
+    let similarKey = getSimilarKey(
+      groupedArticles,
+      article.title,
+      article.content_preview
+    );
     if (similarKey) {
       groupedArticles.get(similarKey).push(article);
     } else {
-      groupedArticles.set(article.title + "_" + article.content_preview, [article]);
+      groupedArticles.set(article.title + "_" + article.content_preview, [
+        article,
+      ]);
     }
   }
 
@@ -106,8 +116,7 @@ function getArticles(req, res) {
 }
 
 const base = new Airtable({
-  apiKey:
-  process.env.AIRTABLE_API_KEY,
+  apiKey: AIRTABLE_API_KEY,
 }).base("appKfm9gouHkcTC42");
 function updateAirtable(articles) {
   articles.forEach((article) => {
@@ -189,25 +198,31 @@ function getDate(dateString) {
   return year + "-" + month + "-" + day;
 }
 
-
 function getSimilarKey(groupedArticles, title, contentPreview) {
-  const titleSimilarityThreshold = 0.7;  // adjust this value to fit your needs
-  const contentSimilarityThreshold = 0.7;  // adjust this value to fit your needs
+  const titleSimilarityThreshold = 0.7; // adjust this value to fit your needs
+  const contentSimilarityThreshold = 0.7; // adjust this value to fit your needs
   let similarKey = null;
 
   groupedArticles.forEach((_, key) => {
     const [groupKeyTitle, groupKeyContent] = key.split("_");
-    const titleSimilarity = stringSimilarity.compareTwoStrings(groupKeyTitle, title);
-    const contentSimilarity = stringSimilarity.compareTwoStrings(groupKeyContent, contentPreview);
-    if (titleSimilarity > titleSimilarityThreshold || contentSimilarity > contentSimilarityThreshold) {
+    const titleSimilarity = stringSimilarity.compareTwoStrings(
+      groupKeyTitle,
+      title
+    );
+    const contentSimilarity = stringSimilarity.compareTwoStrings(
+      groupKeyContent,
+      contentPreview
+    );
+    if (
+      titleSimilarity > titleSimilarityThreshold ||
+      contentSimilarity > contentSimilarityThreshold
+    ) {
       similarKey = key;
     }
   });
 
   return similarKey;
 }
-
-
 
 module.exports = {
   getArticles: getArticles,

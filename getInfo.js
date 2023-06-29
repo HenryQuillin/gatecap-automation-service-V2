@@ -2,7 +2,7 @@ const Airtable = require("airtable");
 const axios = require("axios");
 const puppeteer = require("puppeteer-extra");
 require("dotenv").config();
-const { uploadFile } = require("./uploadFile");
+// const { uploadFile } = require("./uploadFile");
 const moment = require("moment-timezone");
 const { updateAirtableWithCompanyNotFoundError } = require("./helpers");
 
@@ -105,7 +105,7 @@ async function getInfo(body, cb) {
 }
 
 async function scrapePage(recordName, record) {
-  const folderName = getDate();
+  // const folderName = getDate();
 
   puppeteer.use(pluginStealth());
   return puppeteer
@@ -370,20 +370,20 @@ async function updateAirtableErrorDetails(recordID, error) {
   ]);
 }
 
-function getDate() {
-  const date = moment().tz("America/Chicago");
-  let month = "" + (date.month() + 1); // Months are zero-indexed in moment.js
-  let day = "" + date.date();
-  let hour = "" + date.hours();
-  let minute = "" + date.minutes();
+// function getDate() {
+//   const date = moment().tz("America/Chicago");
+//   let month = "" + (date.month() + 1); // Months are zero-indexed in moment.js
+//   let day = "" + date.date();
+//   let hour = "" + date.hours();
+//   let minute = "" + date.minutes();
 
-  if (month.length < 2) month = "0" + month;
-  if (day.length < 2) day = "0" + day;
-  if (hour.length < 2) hour = "0" + hour;
-  if (minute.length < 2) minute = "0" + minute;
+//   if (month.length < 2) month = "0" + month;
+//   if (day.length < 2) day = "0" + day;
+//   if (hour.length < 2) hour = "0" + hour;
+//   if (minute.length < 2) minute = "0" + minute;
 
-  return `${month}-${day}-${hour}-${minute}`;
-}
+//   return `${month}-${day}-${hour}-${minute}`;
+// }
 
 module.exports = {
   getInfo: getInfoWrapper,
