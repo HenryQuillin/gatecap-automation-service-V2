@@ -10,6 +10,9 @@ let port = process.env.PORT;
 if (port == null || port == "") {
   table = "News Log - Dev";
 }
+table = "News Log - Dev";
+
+// eslint-disable-next-line no-undef
 const AIRTABLE_API_KEY = process.env.AIRTABLE_API_KEY;
 
 function getArticles(req, res) {
@@ -119,6 +122,9 @@ const base = new Airtable({
   apiKey: AIRTABLE_API_KEY,
 }).base("appKfm9gouHkcTC42");
 function updateAirtable(articles) {
+
+
+
   articles.forEach((article) => {
     base(table).create(
       {
