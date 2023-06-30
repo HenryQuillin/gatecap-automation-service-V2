@@ -236,7 +236,7 @@ async function getUUID(name, record) {
     let response = await axios.request(config);
     const res = response.data.entities[0].identifier.permalink;
     if (compareName(res, name) == false) {
-      updateAirtableWithCompanyNotFoundError(record.id);
+      updateAirtableWithCompanyNotFoundError(base, record.id);
       return null;
     }
     return response.data.entities[0].identifier.permalink;
