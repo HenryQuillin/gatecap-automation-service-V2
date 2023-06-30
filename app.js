@@ -4,6 +4,7 @@ const bodyParser = require("body-parser");
 const { getArticles } = require("./getArticles");
 const { getInfo } = require("./getInfo");
 const { getInfoAll } = require("./getInfoAll");
+const { getReport } = require("./getReport");
 
 
 const app = express();
@@ -20,12 +21,17 @@ app.get("/", (req, res) => {
 app.post("/extract", (req, res) => {
   getArticles(req, res);
 });
+
+app.post("/getReport", (req, res) => {
+  getReport(req, res);
+});
   
 app.post("/getinfo", async (req, res) => {
   console.log("Request received.");
   getInfo(req, res);
 
 });
+
 app.post("/getinfoall", async (req, res) => {
   console.log("Request received.");
   getInfoAll(req, res);
