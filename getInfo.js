@@ -138,10 +138,10 @@ async function scrapePage(recordName, record) {
       console.log("at login for ", recordName);
 
       try {
-        await page.waitForSelector("#mat-input-5", { timeout: 10000 });
-        await page.waitForSelector("#mat-input-6");
-        await page.type("#mat-input-5", "alfred@gate-cap.com");
-        await page.type("#mat-input-6", "KVVE@9810Fm6pKs4");
+        await page.waitForSelector("#mat-input-1", { timeout: 10000 });
+        await page.waitForSelector("#mat-input-2");
+        await page.type("#mat-input-1", "alfred@gate-cap.com");
+        await page.type("#mat-input-2", "KVVE@9810Fm6pKs4");
 
         await Promise.all([
           page.waitForNavigation({ waitUntil: "load" }),
