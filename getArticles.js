@@ -6,13 +6,13 @@ let table = "News Log";
 require("dotenv").config();
 
 //eslint-disable-next-line no-undef
-let port = process.env.PORT;
-if (port == null || port == "") {
-  table = "News Log - Dev";
-}
+// let port = process.env.PORT;
+// if (port == null || port == "") {
+//   table = "News Log - Dev";
+// }
 
-const titleSimilarityThreshold = 0.6; // adjust this value to fit your needs
-const contentSimilarityThreshold = 0.6; // adjust this value to fit your needs
+const titleSimilarityThreshold = 0.7; // adjust this value to fit your needs
+const contentSimilarityThreshold = 0.7; // adjust this value to fit your needs
 
 
 // eslint-disable-next-line no-undef
