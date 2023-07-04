@@ -1,4 +1,6 @@
 require("dotenv").config();
+const nodemailer = require("nodemailer");
+
 const _ = require('lodash');
 
 
@@ -42,6 +44,9 @@ async function getArticleData() {
 async function summarizeArticles(articleData, companyName) {
   // let articles = articleData.map(article => `${article.Title}: ${article['Content Preview']}`).join("\n");
   let articles = JSON.stringify(articleData, null, 2);
+
+  truncateText(articles, 55000);
+  
   let prompt =
   `As an AI developed by OpenAI, you have been tasked with assisting in the monitoring of our current portfolio companies. Specifically, your role is to digest and summarize the key events and news related to our portfolio company, ${companyName}, over the past week.
 
@@ -111,11 +116,50 @@ async function getReport(req, res) {
     }
 
     const formattedReport = formatReports(reports);
-    res.send(formattedReport); // send the reports as the response
+    let result = await sendEmail(formattedReport)
+    res.send(result); // send the reports as the response
+
+
+
   } catch (error) {
     console.error(error);
   }
 }
 
 
+
+async function sendEmail(html) {
+  // Async function enables allows handling of promises with await
+  
+    // First, define send settings by creating a new transporter: 
+    let transporter = nodemailer.createTransport({
+      host: "smtp.gmail.com", // SMTP server address (usually mail.your-domain.com)
+      port: 465, // Port for SMTP (usually 465)
+      secure: true, // Usually true if connecting to port 465
+      auth: {
+        user: "henryquillin@gmail.com", // Your email address
+        pass: "cwxnbvddelohlxou", // Password (for gmail, your app password)
+        // ⚠️ For better security, use environment variables set on the server for these values when deploying
+      },
+    });
+    
+    // Define and send message inside transporter.sendEmail() and await info about send from promise:
+    let info = await transporter.sendMail({
+      from: 'GateCap Automations <henryquillin@gmail.com>',
+      to: "henry@gvmadvisors.com",
+      subject: "Weekly Update",
+      html: html
+    });
+  
+    return info.response; // Random ID generated after successful send (optional)
+  }
+
+  function truncateText(string, maxLength) {
+    if (string.length > maxLength) {
+      return string.substring(0, maxLength) + "...";
+    } else {
+      return string;
+    }
+  }
+  
 module.exports = { getReport };
