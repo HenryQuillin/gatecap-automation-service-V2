@@ -46,7 +46,7 @@ async function summarizeArticles(articleData, companyName) {
   let articles = JSON.stringify(articleData, null, 2);
 
   truncateText(articles, 55000);
-  
+
   let prompt =
   `As an AI developed by OpenAI, you have been tasked with assisting in the monitoring of our current portfolio companies. Specifically, your role is to digest and summarize the key events and news related to our portfolio company, ${companyName}, over the past week.
 
@@ -118,6 +118,7 @@ async function getReport(req, res) {
     const formattedReport = formatReports(reports);
     let result = await sendEmail(formattedReport)
     res.send(result); // send the reports as the response
+    console.log("Done: ", result)
 
 
 
@@ -137,8 +138,8 @@ async function sendEmail(html) {
       port: 465, // Port for SMTP (usually 465)
       secure: true, // Usually true if connecting to port 465
       auth: {
-        user: "henryquillin@gmail.com", // Your email address
-        pass: "cwxnbvddelohlxou", // Password (for gmail, your app password)
+        user: process.env.SENDER_EMAIL, // Your email address
+        pass: process.env.EMAIL_PASSWORD, // Password (for gmail, your app password)
         // ⚠️ For better security, use environment variables set on the server for these values when deploying
       },
     });
