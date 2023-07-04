@@ -5,15 +5,14 @@ let table = "News Log";
 
 require("dotenv").config();
 
-//eslint-disable-next-line no-undef
-// let port = process.env.PORT;
-// if (port == null || port == "") {
-//   table = "News Log - Dev";
-// }
+// eslint-disable-next-line no-undef
+let port = process.env.PORT;
+if (port == null || port == "") {
+  table = "News Log - Dev";
+}
 
 const titleSimilarityThreshold = 0.7; // adjust this value to fit your needs
 const contentSimilarityThreshold = 0.7; // adjust this value to fit your needs
-
 
 // eslint-disable-next-line no-undef
 const AIRTABLE_API_KEY = process.env.AIRTABLE_API_KEY;
@@ -88,30 +87,29 @@ function getArticles(req, res) {
         .trim()
         .toLowerCase();
     }
-   // Compare with all previous articles from the same email
-   let similarArticleIndex = articles.findIndex(previousArticle =>
-    isSimilar(previousArticle, article)
-  );
+    // Compare with all previous articles from the same email
+    let similarArticleIndex = articles.findIndex((previousArticle) =>
+      isSimilar(previousArticle, article)
+    );
 
-  if (similarArticleIndex !== -1) {
-    // If similar, merge data
-    mergeArticleData(articles[similarArticleIndex], article);
-  } else {
-    // If not similar to any previous article, add to list
-    articles.push(article);
+    if (similarArticleIndex !== -1) {
+      // If similar, merge data
+      mergeArticleData(articles[similarArticleIndex], article);
+    } else {
+      // If not similar to any previous article, add to list
+      articles.push(article);
+    }
   }
-}
 
-updateAirtable(articles);
-res.json(articles);
+  updateAirtable(articles);
+  res.json(articles);
 }
-
 
 // Adjust the function updateAirtable to include the comparison logic:
 async function updateAirtable(articles) {
   // 1. Retrieve records from the last 14 days from your Airtable base.
   const existingRecords = await getExistingRecords();
-  console.log("EXISTING RECORDS: ",existingRecords.length)
+  console.log("EXISTING RECORDS: ", existingRecords.length);
 
   articles.forEach((article) => {
     // 2. Compare each new article to this list of records.
@@ -131,7 +129,7 @@ async function getExistingRecords() {
   let existingRecords = [];
   await base(table)
     .select({
-      view: "Past two weeks",  // Specify the view here
+      view: "Past two weeks", // Specify the view here
     })
     .eachPage(function page(records, fetchNextPage) {
       records.forEach(function (record) {
@@ -159,48 +157,61 @@ function isSimilar(article1, article2) {
   );
 }
 function mergeArticleData(article1, article2) {
-  article1.source += ', ' + article2.source;
-  article1.link += ', ' + article2.link;
+  article1.source += ", " + article2.source;
+  article1.link += ", " + article2.link;
 }
-
 
 function findSimilarRecord(existingRecords, newArticle) {
   let similarRecord = null;
+
   for (const record of existingRecords) {
-    const titleSimilarity = stringSimilarity.compareTwoStrings(
-      record.get('Title'),
-      newArticle.title
-    );
-    const contentSimilarity = stringSimilarity.compareTwoStrings(
-      record.get('Content Preview'),
-      newArticle.content_preview
-    );
-    // console.log('Title Similarity:', titleSimilarity);
-    // console.log('Content Similarity:', contentSimilarity);
     if (
-      titleSimilarity > titleSimilarityThreshold ||
-      contentSimilarity > contentSimilarityThreshold
+      record.get("Company") === newArticle.company &&
+      record.get("Type") === newArticle.type
     ) {
-      similarRecord = record;
-      break;
+      const titleSimilarity = stringSimilarity.compareTwoStrings(
+        record.get("Title"),
+        newArticle.title
+      );
+      const contentSimilarity = stringSimilarity.compareTwoStrings(
+        record.get("Content Preview"),
+        newArticle.content_preview
+      );
+      // console.log('Title Similarity:', titleSimilarity);
+      // console.log('Content Similarity:', contentSimilarity);
+      if (
+        titleSimilarity > titleSimilarityThreshold ||
+        contentSimilarity > contentSimilarityThreshold
+      ) {
+        similarRecord = record;
+        break;
+      }
     }
   }
   return similarRecord;
 }
 
 function updateRecord(record, article) {
-  base(table).update(record.getId(), {
-    'Source': record.get('Source') + ", " + article.source,
-    'Link': record.get('Link') + ", " + article.link,
-  }, function(err, record) {
-    if (err) {
-      console.error('Error updating record:', err);
-      return;
+  base(table).update(
+    record.getId(),
+    {
+      Source: record.get("Source") + ", " + article.source,
+      Link: record.get("Link") + ", " + article.link,
+    },
+    function (err, record) {
+      if (err) {
+        console.error("Error updating record:", err);
+        return;
+      }
+      console.log(
+        "Updated record:",
+        record.get("Title"),
+        "with data:",
+        article
+      );
     }
-    console.log('Updated record:', record.get("Title"), 'with data:', article);
-  });
+  );
 }
-
 
 // Create a new record
 function createRecord(article) {
@@ -225,12 +236,6 @@ function createRecord(article) {
     }
   );
 }
-
-
-
-
-
-
 
 function getAlertQueryString(subject) {
   // Extract the query string from the subject
@@ -313,20 +318,7 @@ function getDate(dateString) {
 //   return similarKey;
 // }
 
-
-
-
-
-
-
-
-
-
-
-
 // function updateAirtable(articles) {
-
-
 
 //   articles.forEach((article) => {
 //     base(table).create(
@@ -351,7 +343,6 @@ function getDate(dateString) {
 //     );
 //   });
 // }
-
 
 module.exports = {
   getArticles: getArticles,
