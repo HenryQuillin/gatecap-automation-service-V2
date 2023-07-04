@@ -53,7 +53,7 @@ function getArticles(req, res) {
       title: $(titleElements[i]).text(),
       content_preview: $(previewElements[i]).text(),
       source: $(sourceElements[i]).text(),
-      link: $(linkElements[i]).attr("href"),
+      links: $(linkElements[i]).attr("href"),
       company: company,
       alertQueryString: alertQueryString,
       alertEmailURL: alertEmailURL,
@@ -158,7 +158,7 @@ function isSimilar(article1, article2) {
 }
 function mergeArticleData(article1, article2) {
   article1.source += ", " + article2.source;
-  article1.link += ", " + article2.link;
+  article1.links += ", " + article2.links;
 }
 
 function findSimilarRecord(existingRecords, newArticle) {
@@ -196,7 +196,7 @@ function updateRecord(record, article) {
     record.getId(),
     {
       Source: record.get("Source") + ", " + article.source,
-      Link: record.get("Link") + ", " + article.link,
+      Links: record.get("Links") + ", " + article.links,
     },
     function (err, record) {
       if (err) {
@@ -223,7 +223,7 @@ function createRecord(article) {
       Title: article.title,
       "Content Preview": article.content_preview,
       Source: article.source,
-      Link: article.link,
+      Links: article.Links,
       "Alert Email URL": article.alertEmailURL,
       Date: article.date,
     },
@@ -329,7 +329,7 @@ function getDate(dateString) {
 //         Title: article.title,
 //         "Content Preview": article.content_preview,
 //         Source: article.source,
-//         Link: article.link,
+//         Links: article.Links,
 //         "Alert Email URL": article.alertEmailURL,
 //         Date: article.date,
 //       },
