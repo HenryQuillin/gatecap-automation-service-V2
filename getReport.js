@@ -60,10 +60,14 @@ Please generate an HTML formatted summary of the key events from these articles 
     <!-- Include the rest of the individual summaries of the events here -->
   </ul> 
 
-Here is the collected news data related to ${companyName} for the past week:
-${articles}
+  For example, if the articles were about Engiven, the summary might look like this:
+  <h2>Engiven</h2>
+  <li><strong>African NGOs offer knowledge to allow professionals to explore cryptocurrencies more</strong>: In a report by The Reporter Times, it was highlighted that African NGOs are offering knowledge and support to professionals to help them explore cryptocurrencies. After a brief crypto ban in 2021, Africa has reopened its regulations and is now working towards leveraging the benefits of cryptocurrencies. The article mentions that people in Africa often trade crypto for practical reasons, given the challenges they face with wages. This indicates the emergence of Africa's crypto economy.</li>
 
-Please provide an exhaustive and comprehensive summary of the key events from these articles. Include source links where necessary`;
+Here is the collected news data related to ${companyName} for the past week:
+${articles} `
+
+// Please provide an exhaustive and comprehensive summary of the key events from these articles. Include source links where necessary`;
 
 
 
