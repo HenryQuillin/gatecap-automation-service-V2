@@ -60,15 +60,20 @@ Please generate an HTML formatted summary of the key events from these articles 
     <!-- Include the rest of the individual summaries of the events here -->
   </ul> 
 
-  For example, if the articles were about Engiven, the summary might look like this:
-  <h2>Engiven</h2>
-  <li><strong>African NGOs offer knowledge to allow professionals to explore cryptocurrencies more</strong>: In a report by The Reporter Times, it was highlighted that African NGOs are offering knowledge and support to professionals to help them explore cryptocurrencies. After a brief crypto ban in 2021, Africa has reopened its regulations and is now working towards leveraging the benefits of cryptocurrencies. The article mentions that people in Africa often trade crypto for practical reasons, given the challenges they face with wages. This indicates the emergence of Africa's crypto economy.</li>
+
 
 Here is the collected news data related to ${companyName} for the past week:
-${articles} `
+${articles} 
+Do not make a bullet for each article. Rather, summarize the key events from the articles. So if two articles talk about the same event, combine them into one bullet. 
+`
 
 // Please provide an exhaustive and comprehensive summary of the key events from these articles. Include source links where necessary`;
-
+// For example, if the articles were about Prime Trust, the summary might look like this:
+// -BitGo CEO Reveals Pending Acquisitions Amidst Abandoned Prime Trust Deal: BitGo terminated the acquisition of Prime Trust, raising questions about the stability and future of Prime Trust. The deal was expected to provide financial assistance to Prime Trust. 
+// -TrueUSD Depegs on Binance.US, Drops to 80 Cents Against Tether: TrueUSD depegged from its intended value and dropped in value against Tether. The stablecoin's reliance on Prime Trust raised concerns about its stability.
+// -Nevada’s Financial Watchdog Seeks Receivership of Crypto Custodian Prime Trust Amidst Insolvency: The Nevada Financial Institutions Division filed a petition to take control of Prime Trust and freeze all its businesses due to insolvency concerns. Prime Trust allegedly lost access to wallets and used customer assets to buy cryptocurrencies.
+//  ...
+// sources: source1, source2, etc..
 
 
 
