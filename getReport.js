@@ -5,7 +5,6 @@ const _ = require('lodash');
 
 
 const axios = require("axios");
-const csv = require("csv-parser");
 const { Configuration, OpenAIApi } = require("openai");
 
 // eslint-disable-next-line no-undef
@@ -112,11 +111,10 @@ async function getReport(req, res) {
     for (let company in groupedByCompany) {
       const summary = await summarizeArticles(groupedByCompany[company],company);
       reports[company] = summary;
-      // Here you can call sendEmail(summary, company) to send a report for each company separately
     }
 
     const formattedReport = formatReports(reports);
-    let result = await sendEmail(formattedReport)
+    let result = await sendEmail(formattedReport, req.body.emails)
     res.send(result); // send the reports as the response
     console.log("Done: ", result)
 
@@ -129,7 +127,7 @@ async function getReport(req, res) {
 
 
 
-async function sendEmail(html) {
+async function sendEmail(html, emails) {
   // Async function enables allows handling of promises with await
   
     // First, define send settings by creating a new transporter: 
@@ -147,12 +145,12 @@ async function sendEmail(html) {
     // Define and send message inside transporter.sendEmail() and await info about send from promise:
     let info = await transporter.sendMail({
       from: 'GateCap Automations <henryquillin@gmail.com>',
-      to: "henry@gvmadvisors.com",
+      to: emails,
       subject: "Weekly Update",
       html: html
     });
   
-    return info.response; // Random ID generated after successful send (optional)
+    return info.response; 
   }
 
   function truncateText(string, maxLength) {
