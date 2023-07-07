@@ -89,7 +89,7 @@ Do not make a bullet for each article. Rather, summarize the key events from the
     console.log("summary generated for: ", companyName);
     return response.data.choices[0].message.content;
   } catch (error) {
-        console.log("ERROR GENERATING SUMMARY for: ", companyName);
+    console.log("ERROR GENERATING SUMMARY for: ", companyName);
 
     console.error(error);
   }
@@ -152,6 +152,7 @@ async function sendEmail(html, emails) {
     });
     
     // Define and send message inside transporter.sendEmail() and await info about send from promise:
+    console.log("EMAILS: ", emails)
     let info = await transporter.sendMail({
       from: 'GateCap Automations <henryquillin@gmail.com>',
       to: emails || 'alfred@gvmadvisors.com, henry@gvmadvisors.com',
