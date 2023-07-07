@@ -89,7 +89,7 @@ Do not make a bullet for each article. Rather, summarize the key events from the
     console.log("summary generated for: ", companyName);
     return response.data.choices[0].message.content;
   } catch (error) {
-        console.log("summary generated for: ", companyName);
+        console.log("ERROR GENERATING SUMMARY for: ", companyName);
 
     console.error(error);
   }
