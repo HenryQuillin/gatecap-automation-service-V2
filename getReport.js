@@ -154,7 +154,7 @@ async function sendEmail(html, emails) {
     // Define and send message inside transporter.sendEmail() and await info about send from promise:
     let info = await transporter.sendMail({
       from: 'GateCap Automations <henryquillin@gmail.com>',
-      to: emails,
+      to: emails || 'alfred@gvmadvisors.com, henry@gvmadvisors.com',
       subject: "Weekly Update (TEST)",
       html: html
     });
