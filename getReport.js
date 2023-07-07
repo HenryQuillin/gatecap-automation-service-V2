@@ -155,7 +155,7 @@ async function sendEmail(html, emails) {
     let info = await transporter.sendMail({
       from: 'GateCap Automations <henryquillin@gmail.com>',
       to: emails,
-      subject: "Weekly Update",
+      subject: "Weekly Update (TEST)",
       html: html
     });
   
