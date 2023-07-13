@@ -21,7 +21,7 @@ const base = new Airtable({
   apiKey: AIRTABLE_API_KEY,
 }).base("appKfm9gouHkcTC42");
 
-function getArticles(req, res) {
+async function getArticles(req, res) {
   console.log("getArticles Request received for email " + req.body.alertEmailID);
   const alertEmailURL =
     "https://mail.google.com/mail/u/3/#inbox/" + req.body.alertEmailID;
@@ -103,15 +103,20 @@ function getArticles(req, res) {
       articles.push(article);
     }
   }
+  console.log("ARTICLES: " + articles);
 
-  updateAirtable(articles).catch(err => {
+  try {
+    await updateAirtable(articles);
+    res.json(articles);
+  } catch (err) {
     console.error("Error in updateAirtable:", err);
-  });
-  res.json(articles);
+    res.status(500).json({ error: 'There was an error processing your request' });
+  }
 }
 
 // Adjust the function updateAirtable to include the comparison logic:
 async function updateAirtable(articles) {
+  console.log("Updating Airtable");
   // 1. Retrieve records from the last 14 days from your Airtable base.
   const existingRecords = await getExistingRecords();
   console.log("EXISTING RECORDS: ", existingRecords.length);
