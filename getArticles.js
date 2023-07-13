@@ -49,7 +49,7 @@ async function getArticles(req, res) {
   );
 
   let articles = [];
-
+    console.log("Number of incoming articles: " + linkElements.length)
   for (let i = 0; i < linkElements.length; i++) {
     let article = {
       type: "",
