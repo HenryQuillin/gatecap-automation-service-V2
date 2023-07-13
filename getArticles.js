@@ -22,6 +22,7 @@ const base = new Airtable({
 }).base("appKfm9gouHkcTC42");
 
 function getArticles(req, res) {
+  console.log("getArticles Request received for email " + req.body.alertEmailID);
   const alertEmailURL =
     "https://mail.google.com/mail/u/3/#inbox/" + req.body.alertEmailID;
   const html = req.body.html;
@@ -29,6 +30,8 @@ function getArticles(req, res) {
   const alertQueryString = getAlertQueryString(req.body.subject);
   const company = getCompany(alertQueryString);
 
+
+  
   let linkElements = $(
     "td:nth-child(2) > table > tbody > tr:nth-child(1) > td > a"
   );
@@ -101,7 +104,9 @@ function getArticles(req, res) {
     }
   }
 
-  updateAirtable(articles);
+  updateAirtable(articles).catch(err => {
+    console.error("Error in updateAirtable:", err);
+  });
   res.json(articles);
 }
 
@@ -127,9 +132,11 @@ async function updateAirtable(articles) {
 
 async function getExistingRecords() {
   let existingRecords = [];
-  await base(table)
+  console.log("TABLE: ", table)
+  try {
+    await base(table)
     .select({
-      view: "Past two weeks", // Specify the view here
+      view: "Past week", // Specify the view here
     })
     .eachPage(function page(records, fetchNextPage) {
       records.forEach(function (record) {
@@ -137,6 +144,11 @@ async function getExistingRecords() {
       });
       fetchNextPage();
     });
+  }
+  catch (err) {
+    console.error("Error in getExistingRecords records:", err);
+  }
+
 
   return existingRecords;
 }
@@ -192,49 +204,60 @@ function findSimilarRecord(existingRecords, newArticle) {
 }
 
 function updateRecord(record, article) {
-  base(table).update(
-    record.getId(),
-    {
-      Source: record.get("Source") + ", " + article.source,
-      Links: record.get("Links") + ", " + article.links,
-    },
-    function (err, record) {
-      if (err) {
-        console.error("Error updating record:", err);
-        return;
+  try {
+    base(table).update(
+      record.getId(),
+      {
+        Source: record.get("Source") + ", " + article.source,
+        Links: record.get("Links") + ", " + article.links,
+      },
+      function (err, record) {
+        if (err) {
+          console.error("Error updating record:", err);
+          return;
+        }
+        console.log(
+          "Updated record:",
+          record.get("Title"),
+          "with data:",
+          article
+        );
       }
-      console.log(
-        "Updated record:",
-        record.get("Title"),
-        "with data:",
-        article
-      );
-    }
-  );
+    );
+  } catch (err) { 
+    console.error("Error in updateRecord:", err);
+  }
+
 }
 
 // Create a new record
 function createRecord(article) {
-  base(table).create(
-    {
-      Company: article.company,
-      "Alert Query String": article.alertQueryString,
-      Type: article.type,
-      Title: article.title,
-      "Content Preview": article.content_preview,
-      Source: article.source,
-      Links: article.Links,
-      "Alert Email URL": article.alertEmailURL,
-      Date: article.date,
-    },
-    function (err, record) {
-      if (err) {
-        console.error("Error creating record:", err);
-        return;
+  try{
+    base(table).create(
+      {
+        Company: article.company,
+        "Alert Query String": article.alertQueryString,
+        Type: article.type,
+        Title: article.title,
+        "Content Preview": article.content_preview,
+        Source: article.source,
+        Links: article.Links,
+        "Alert Email URL": article.alertEmailURL,
+        Date: article.date,
+      },
+      function (err, record) {
+        if (err) {
+          console.error("Error creating record:", err);
+          return;
+        }
+        console.log("Created record:", record.getId());
       }
-      console.log("Created record:", record.getId());
-    }
-  );
+    );
+  }
+  catch (err) { 
+    console.error("Error in createRecord:", err);
+  }
+
 }
 
 function getAlertQueryString(subject) {
@@ -292,57 +315,7 @@ function getDate(dateString) {
   return year + "-" + month + "-" + day;
 }
 
-// function getSimilarKey(groupedArticles, title, contentPreview) {
-//   const titleSimilarityThreshold = 0.6; // adjust this value to fit your needs
-//   const contentSimilarityThreshold = 0.6; // adjust this value to fit your needs
-//   let similarKey = null;
 
-//   groupedArticles.forEach((_, key) => {
-//     const [groupKeyTitle, groupKeyContent] = key.split("_");
-//     const titleSimilarity = stringSimilarity.compareTwoStrings(
-//       groupKeyTitle,
-//       title
-//     );
-//     const contentSimilarity = stringSimilarity.compareTwoStrings(
-//       groupKeyContent,
-//       contentPreview
-//     );
-//     if (
-//       titleSimilarity > titleSimilarityThreshold ||
-//       contentSimilarity > contentSimilarityThreshold
-//     ) {
-//       similarKey = key;
-//     }
-//   });
-
-//   return similarKey;
-// }
-
-// function updateAirtable(articles) {
-
-//   articles.forEach((article) => {
-//     base(table).create(
-//       {
-//         Company: article.company,
-//         "Alert Query String": article.alertQueryString,
-//         Type: article.type,
-//         Title: article.title,
-//         "Content Preview": article.content_preview,
-//         Source: article.source,
-//         Links: article.Links,
-//         "Alert Email URL": article.alertEmailURL,
-//         Date: article.date,
-//       },
-//       function (err, record) {
-//         if (err) {
-//           console.error(err);
-//           return;
-//         }
-//         console.log(record.getId());
-//       }
-//     );
-//   });
-// }
 
 module.exports = {
   getArticles: getArticles,
