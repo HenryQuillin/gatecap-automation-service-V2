@@ -103,7 +103,7 @@ async function getArticles(req, res) {
       articles.push(article);
     }
   }
-  console.log("ARTICLES: " + articles);
+  console.log("Number of new articles" + articles.length);
 
   try {
     await updateAirtable(articles);
