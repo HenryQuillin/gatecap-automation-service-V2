@@ -5,6 +5,20 @@ const { getArticles } = require("./getArticles");
 const { getInfo } = require("./getInfo");
 const { getInfoAll } = require("./getInfoAll");
 const { getReport } = require("./getReport");
+const TelegramBot = require("node-telegram-bot-api");
+const Airtable = require("airtable");
+
+const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN, { polling: true });
+// listen for any kind of message
+bot.on("message", (msg) => {
+  const chatId = msg.chat.id;
+
+  // send a message to the chat acknowledging receipt of their message
+  bot.sendMessage(chatId, "Received your message");
+
+  // TODO: extract company info from the message
+  // and upload to airtable
+});
 
 const app = express();
 app.use(bodyParser.json({ limit: "10mb" }));
