@@ -22,13 +22,16 @@ const base = new Airtable({
 }).base("appKfm9gouHkcTC42");
 
 async function getArticles(req, res) {
-  console.log("getArticles Request received for email " + req.body.alertEmailID);
   const alertEmailURL =
     "https://mail.google.com/mail/u/3/#inbox/" + req.body.alertEmailID;
   const html = req.body.html;
   const $ = cheerio.load(html);
   const alertQueryString = getAlertQueryString(req.body.subject);
   const company = getCompany(alertQueryString);
+  console.log("getArticles Request received for email " + req.body.alertEmailID);
+  console.log("Company: " + company);
+
+
 
 
   
@@ -103,7 +106,7 @@ async function getArticles(req, res) {
       articles.push(article);
     }
   }
-  console.log("Number of new articles" + articles.length);
+  console.log("Number of new articles for " + articles[0].company + ": " + articles.length);
 
   try {
     await updateAirtable(articles);
@@ -224,8 +227,6 @@ function updateRecord(record, article) {
         console.log(
           "Updated record:",
           record.get("Title"),
-          "with data:",
-          article
         );
       }
     );
