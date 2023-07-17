@@ -2,7 +2,7 @@ const Airtable = require("airtable");
 // const axios = require("axios");
 const puppeteer = require("puppeteer-extra");
 require("dotenv").config();
-const { uploadFile } = require("../uploadFile");
+const { uploadFile } = require("./uploadFile");
 const moment = require("moment-timezone");
 const {
   updateAirtableWithCompanyNotFoundError,
