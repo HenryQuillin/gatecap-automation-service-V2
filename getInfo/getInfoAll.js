@@ -7,7 +7,7 @@ const moment = require("moment-timezone");
 const {
   updateAirtableWithCompanyNotFoundError,
   updateAirtableWithScrapingStatus,
-} = require("../helpers");
+} = require("./helpers");
 
 // Add stealth plugin and use defaults
 const pluginStealth = require("puppeteer-extra-plugin-stealth");
