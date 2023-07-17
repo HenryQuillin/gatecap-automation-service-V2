@@ -1,10 +1,10 @@
 const express = require("express");
 
 const bodyParser = require("body-parser");
-const { getArticles } = require("./getArticles");
-const { getInfo } = require("./getInfo");
-const { getInfoAll } = require("./getInfoAll");
-const { getReport } = require("./getReport");
+const { getArticles } = require("./newsLog/getArticles");
+const { getInfo } = require("./getInfo/getInfo");
+const { getInfoAll } = require("./getInfo/getInfoAll");
+const { getReport } = require("./newsLog/getReport");
 
 const app = express();
 app.use(bodyParser.json({ limit: "10mb" }));
