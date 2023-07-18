@@ -1,174 +1,49 @@
-require("dotenv").config();
-const nodemailer = require("nodemailer");
 
-const _ = require('lodash');
-
-
-const axios = require("axios");
 const { Configuration, OpenAIApi } = require("openai");
-
-// eslint-disable-next-line no-undef
-
-
-// store the entire for investor report data in a json object 
-// For each company
-  // filter by that company 
-  // set the prompt to be the company name and the filtered data 
-    // note, the data should be truncated to 15,000 characters
-  // run the summarizeArticles function on the prompt
-  
-
-
-
-
+require("dotenv").config();
 const configuration = new Configuration({
-  apiKey: process.env.GPT_API_KEY,
-});
-const openai = new OpenAIApi(configuration);
+    // eslint-disable-next-line no-undef
+    apiKey: process.env.GPT_API_KEY,
+  });
+  const openai = new OpenAIApi(configuration);
 
-async function getArticleData() {
-  try {
-    const json = await axios.get('https://api.csvgetter.com/files/f0bc117df8?type=json_records&cols=Title,Company,Content Preview,Links');
-    const res = json.data;
-    return res;
-  } catch (error) {
-    console.error(error);
-  }
-}
+// const summaries = "{'HamsaPay':'<h2>HamsaPay</h2>\n\n<ul>\n  <li><strong>Cardano Wallets:</strong> Choosing the Best Cardano Wallet - Top 7 ADA. Cardano is a blockchain where ADA cryptocurrency lives.</li>\n  <li><strong>Spiritual Bracelets:</strong> 10 Types of Spiritual Bracelets for Protection Gentle Soul - Rose Quartz Hamsa Evil Eye Charm Bracelet Expand your heart to...</li>\n</ul>','Prime Trust':'<h2>Prime Trust</h2>\n\n<ul>\n  <li><strong>Blockchain gaming platform creates refundable NFT program:</strong> Prime Trust has implemented a refundable non-fungible token (NFT) program on a blockchain gaming platform.</li>\n  <li><strong>TrueUSD (TUSD) reaches $3 billion circulation despite Prime Trust insolvency:</strong> Despite concerns over Prime Trust's insolvency, TrueUSD, a USD-pegged stablecoin, has reached a circulation of $3 billion.</li>\n  <li><strong>Democratic Party of Oregon repays mysterious FTX-related contribution:</strong> The Democratic Party of Oregon repaid a $500,000 contribution from Prime Trust LLC, which was later amended to be sourced from Nishad Singh, FTX's director of engineering.</li>\n  <li><strong>Binance.US unable to find bank partners in the United States:</strong> Binance.US is currently holding customer funds through Prime Trust, but the exchange is struggling to find bank partners in the United States.</li>\n  <li><strong>Concerns arise over control of TUSD as Prime Trust faces scrutiny:</strong> There are concerns regarding the control and stability of TrueUSD due to issues surrounding Prime Trust, including the involvement of the same auditor in both Prime Trust's USD audits and the FTX scandal.</li>\n  <li><strong>Crypto asset market dependent on stablecoin, TUSD risks:</strong> Despite Prime Trust's insolvency and reserve reporting turmoil, TrueUSD continues to be used for liquidity pools in the crypto asset market.</li>\n  <li><strong>Prime Trust faces challenges as a custodian:</strong> Prime Trust, a crypto custodian, is experiencing challenges as it owes customers over $80 million due to misplaced keys, resulting in the halt of its operations.</li>\n  <li><strong>Stablecoin market volatility and regulatory challenges:</strong> Stablecoins, such as TrueUSD, have faced volatility and regulatory challenges, including the closure of Prime Trust's services as TrueUSD's custodian.</li>\n  <li><strong>Concerns over transferring ownership of TUSD and implications for the crypto market:</strong> Transferring ownership of TrueUSD raises concerns as Prime Trust, the custodian with an opaque structure, has faced issues and its audit involvement in the FTX scandal.</li>\n  <li><strong>Celsius Network's Alex Mashinsky arrested as SEC, CFTC, and FTC sue bankrupt crypto lender:</strong> Alex Mashinsky, CEO of Celsius Network, has been arrested as regulatory agencies file lawsuits against the bankrupt crypto lender. This event is relevant to the previous cutting of ties between Prime Trust and Celsius Network.</li>\n</ul>','Figure':'<h2>Figure</h2>\n\n<ul>\n  <li><strong>Figure powering HELOCs for 4 more big mortgage banks</strong>: Figure Technologies Inc. will provide its technology to power a branded Home Equity Line of Credit (HELOC) product for four top 20 lenders.</li>\n  <li><strong>Figure adds four nonbanks to HELOC partnership program</strong>: Figure Technologies has expanded its HELOC wholesale loan production platform by partnering with four nonbank institutions.</li>\n  <li><strong>Figure partners with four IMBs on HELOCs</strong>: Figure Technologies collaborates with CMG Financial, CrossCountry Mortgage, Fairway Independent Mortgage, and The Loan Store to offer private-label HELOC products.</li>\n  <li><strong>Figure expands reach of HELOC products through four new partnerships</strong>: Figure Technologies has formed partnerships with four institutions to widen access to its HELOC products.</li>\n  <li><strong>Figure forms four IMB partnerships to widen HELOC access</strong>: Figure Technologies will collaborate with four top 20 independent mortgage banks to increase access to its HELOC products.</li>\n  <li><strong>Figure teams up with four wholesale mortgage lenders</strong>: Figure Technologies has added CMG Financial, CrossCountry Mortgage, Fairway Independent Mortgage, and The Loan Store to its list of private-label HELOC partners.</li>\n  <li><strong>Figure technology used in DART integration</strong>: DART, a combined lien and eNote registry system developed by Figure Technologies using blockchain technology, enables lenders to convert loans into digital assets on the Provenance Blockchain.</li>\n  <li><strong>Figure expresses interest in supporting FTX revival</strong>: Figure Technologies has expressed interest in supporting the revival of FTX, a collapsed cryptocurrency exchange.</li>\n  <li><strong>Figure leverages Provenance Blockchain for TradFi's entrance into digital asset ecosystem</strong>: Figure Technologies' Provenance Blockchain is expected to benefit from traditional finance's entry into the digital asset ecosystem.</li>\n  <li><strong>Figure collaborates with Apollo Global on blockchain technology</strong>: Apollo Global has been working with Figure Technologies on blockchain technology tailored for the finance industry.</li>\n</ul>','Engiven':'<h2>Engiven</h2>\n<ul>\n  <li><strong>No major events or news articles</strong></li>\n</ul>','Provenance':'<h2>Provenance</h2>\n\n<ul>\n  <li><strong>Data Auditability and Provenance:</strong> Blockchain's immutability ensures data traceability and auditability, promoting the provenance and authenticity of items when used with AI tools like image recognition.</li>\n  <li><strong>Provenance Blockchain Market Capitalization:</strong> Provenance Blockchain's self-reported market capitalization has reached $2.72 billion.</li>\n  <li><strong>Mithraeum Discovery in Italy:</strong> A stunning Mithraeum from 1,600 years ago, with colored marbles, has been discovered in Italy.</li>\n  <li><strong>Figure Partnerships for HELOCs:</strong> Figure, leveraging Provenance Blockchain, has partnered with four IMBs to expand the reach of its Home Equity Line of Credit (HELOC) products.</li>\n  <li><strong>Provenance Blockchain Trading Activity:</strong> Provenance Blockchain has experienced a 36.2% decrease in trading over the past week.</li>\n  <li><strong>Blockchain Application in Accounting:</strong> Blockchain technology can secure data and streamline processes like reconciliation and provenance assurance, potentially reducing or eliminating certain tasks within the accounting field.</li>\n</ul>','CoinRoutes':'<h2>CoinRoutes</h2>\n\n<ul>\n  <li><strong>Bitcoin price surge:</strong> Bitcoin hit a one-year high at $31.7K, leading to optimism among crypto investors. CEO of CoinRoutes, Dave Weisberger, noted the significance of the event and the partial victory in the SEC court fight.</li>\n  <li><strong>Crypto market rally:</strong> Ripple's partial victory against the SEC propelled various cryptocurrencies to record-breaking levels. CoinRoutes CEO explained that the court ruling was good news for the crypto market and provided legal clarity.</li>\n  <li><strong>BlackRock's Bitcoin ETF application:</strong> CoinRoutes CEO highlighted the application's potential impact on market surveillance, as the platform investigates suspicious activity reports (SARs) to identify the beneficial owners behind trades.</li>\n  <li><strong>Market sentiment:</strong> The CEO of CoinRoutes discussed the expected correction in crypto prices and emphasized the need for caution despite retail investor enthusiasm.</li>\n</ul>'}";
+
+// {'HamsaPay':'<h2>HamsaPay</h2>\n\n<ul>\n  <li><strong>Cardano Wallets:</strong> Choosing the Best Cardano Wallet - Top 7 ADA. Cardano is a blockchain where ADA cryptocurrency lives.</li>\n  <li><strong>Spiritual Bracelets:</strong> 10 Types of Spiritual Bracelets for Protection Gentle Soul - Rose Quartz Hamsa Evil Eye Charm Bracelet Expand your heart to...</li>\n</ul>','Prime Trust':'<h2>Prime Trust</h2>\n\n<ul>\n  <li><strong>Blockchain gaming platform creates refundable NFT program:</strong> Prime Trust has implemented a refundable non-fungible token (NFT) program on a blockchain gaming platform.</li>\n  <li><strong>TrueUSD (TUSD) reaches $3 billion circulation despite Prime Trust insolvency:</strong> Despite concerns over Prime Trust's insolvency, TrueUSD, a USD-pegged stablecoin, has reached a circulation of $3 billion.</li>\n  <li><strong>Democratic Party of Oregon repays mysterious FTX-related contribution:</strong> The Democratic Party of Oregon repaid a $500,000 contribution from Prime Trust LLC, which was later amended to be sourced from Nishad Singh, FTX's director of engineering.</li>\n  <li><strong>Binance.US unable to find bank partners in the United States:</strong> Binance.US is currently holding customer funds through Prime Trust, but the exchange is struggling to find bank partners in the United States.</li>\n  <li><strong>Concerns arise over control of TUSD as Prime Trust faces scrutiny:</strong> There are concerns regarding the control and stability of TrueUSD due to issues surrounding Prime Trust, including the involvement of the same auditor in both Prime Trust's USD audits and the FTX scandal.</li>\n  <li><strong>Crypto asset market dependent on stablecoin, TUSD risks:</strong> Despite Prime Trust's insolvency and reserve reporting turmoil, TrueUSD continues to be used for liquidity pools in the crypto asset market.</li>\n  <li><strong>Prime Trust faces challenges as a custodian:</strong> Prime Trust, a crypto custodian, is experiencing challenges as it owes customers over $80 million due to misplaced keys, resulting in the halt of its operations.</li>\n  <li><strong>Stablecoin market volatility and regulatory challenges:</strong> Stablecoins, such as TrueUSD, have faced volatility and regulatory challenges, including the closure of Prime Trust's services as TrueUSD's custodian.</li>\n  <li><strong>Concerns over transferring ownership of TUSD and implications for the crypto market:</strong> Transferring ownership of TrueUSD raises concerns as Prime Trust, the custodian with an opaque structure, has faced issues and its audit involvement in the FTX scandal.</li>\n  <li><strong>Celsius Network's Alex Mashinsky arrested as SEC, CFTC, and FTC sue bankrupt crypto lender:</strong> Alex Mashinsky, CEO of Celsius Network, has been arrested as regulatory agencies file lawsuits against the bankrupt crypto lender. This event is relevant to the previous cutting of ties between Prime Trust and Celsius Network.</li>\n</ul>','Figure':'<h2>Figure</h2>\n\n<ul>\n  <li><strong>Figure powering HELOCs for 4 more big mortgage banks</strong>: Figure Technologies Inc. will provide its technology to power a branded Home Equity Line of Credit (HELOC) product for four top 20 lenders.</li>\n  <li><strong>Figure adds four nonbanks to HELOC partnership program</strong>: Figure Technologies has expanded its HELOC wholesale loan production platform by partnering with four nonbank institutions.</li>\n  <li><strong>Figure partners with four IMBs on HELOCs</strong>: Figure Technologies collaborates with CMG Financial, CrossCountry Mortgage, Fairway Independent Mortgage, and The Loan Store to offer private-label HELOC products.</li>\n  <li><strong>Figure expands reach of HELOC products through four new partnerships</strong>: Figure Technologies has formed partnerships with four institutions to widen access to its HELOC products.</li>\n  <li><strong>Figure forms four IMB partnerships to widen HELOC access</strong>: Figure Technologies will collaborate with four top 20 independent mortgage banks to increase access to its HELOC products.</li>\n  <li><strong>Figure teams up with four wholesale mortgage lenders</strong>: Figure Technologies has added CMG Financial, CrossCountry Mortgage, Fairway Independent Mortgage, and The Loan Store to its list of private-label HELOC partners.</li>\n  <li><strong>Figure technology used in DART integration</strong>: DART, a combined lien and eNote registry system developed by Figure Technologies using blockchain technology, enables lenders to convert loans into digital assets on the Provenance Blockchain.</li>\n  <li><strong>Figure expresses interest in supporting FTX revival</strong>: Figure Technologies has expressed interest in supporting the revival of FTX, a collapsed cryptocurrency exchange.</li>\n  <li><strong>Figure leverages Provenance Blockchain for TradFi's entrance into digital asset ecosystem</strong>: Figure Technologies' Provenance Blockchain is expected to benefit from traditional finance's entry into the digital asset ecosystem.</li>\n  <li><strong>Figure collaborates with Apollo Global on blockchain technology</strong>: Apollo Global has been working with Figure Technologies on blockchain technology tailored for the finance industry.</li>\n</ul>','Engiven':'<h2>Engiven</h2>\n<ul>\n  <li><strong>No major events or news articles</strong></li>\n</ul>','Provenance':'<h2>Provenance</h2>\n\n<ul>\n  <li><strong>Data Auditability and Provenance:</strong> Blockchain's immutability ensures data traceability and auditability, promoting the provenance and authenticity of items when used with AI tools like image recognition.</li>\n  <li><strong>Provenance Blockchain Market Capitalization:</strong> Provenance Blockchain's self-reported market capitalization has reached $2.72 billion.</li>\n  <li><strong>Mithraeum Discovery in Italy:</strong> A stunning Mithraeum from 1,600 years ago, with colored marbles, has been discovered in Italy.</li>\n  <li><strong>Figure Partnerships for HELOCs:</strong> Figure, leveraging Provenance Blockchain, has partnered with four IMBs to expand the reach of its Home Equity Line of Credit (HELOC) products.</li>\n  <li><strong>Provenance Blockchain Trading Activity:</strong> Provenance Blockchain has experienced a 36.2% decrease in trading over the past week.</li>\n  <li><strong>Blockchain Application in Accounting:</strong> Blockchain technology can secure data and streamline processes like reconciliation and provenance assurance, potentially reducing or eliminating certain tasks within the accounting field.</li>\n</ul>','CoinRoutes':'<h2>CoinRoutes</h2>\n\n<ul>\n  <li><strong>Bitcoin price surge:</strong> Bitcoin hit a one-year high at $31.7K, leading to optimism among crypto investors. CEO of CoinRoutes, Dave Weisberger, noted the significance of the event and the partial victory in the SEC court fight.</li>\n  <li><strong>Crypto market rally:</strong> Ripple's partial victory against the SEC propelled various cryptocurrencies to record-breaking levels. CoinRoutes CEO explained that the court ruling was good news for the crypto market and provided legal clarity.</li>\n  <li><strong>BlackRock's Bitcoin ETF application:</strong> CoinRoutes CEO highlighted the application's potential impact on market surveillance, as the platform investigates suspicious activity reports (SARs) to identify the beneficial owners behind trades.</li>\n  <li><strong>Market sentiment:</strong> The CEO of CoinRoutes discussed the expected correction in crypto prices and emphasized the need for caution despite retail investor enthusiasm.</li>\n</ul>'}
 
 
+async function getReport(summaries) {
 
-
-
-async function summarizeArticles(articleData, companyName) {
-  // let articles = articleData.map(article => `${article.Title}: ${article['Content Preview']}`).join("\n");
-  let articles = JSON.stringify(articleData, null, 2);
-
-  truncateText(articles, 55000);
-
-  let prompt =
-  `As an AI developed by OpenAI, you have been tasked with assisting in the monitoring of our current portfolio companies. Specifically, your role is to digest and summarize the key events and news related to our portfolio company, ${companyName}, over the past week.
-
-The audience for this summary is a senior executive who will use your summary to write an investor report. They already have a deep understanding of the company, so you do not need to explain what the company does or provide any analysis or recommendations. Your task is purely to summarize the recent events in a comprehensive manner.
-
-Please generate an HTML formatted summary of the key events from these articles in the format (use <ul>/<li> list with 'subject: details' format for the list of events):
-  <h2>${companyName}</h2>
- 
-  <ul>
-    <li><strong>Subject</strong>: Details</li>
-    ...
-    <!-- Include the rest of the individual summaries of the events here -->
-  </ul> 
-
-
-
-Here is the collected news data related to ${companyName} for the past week:
-${articles} 
-Do not make a bullet for each article. Rather, summarize the key events from the articles. So if two articles talk about the same event, combine them into one bullet. 
-`
-
-// Please provide an exhaustive and comprehensive summary of the key events from these articles. Include source links where necessary`;
-// For example, if the articles were about Prime Trust, the summary might look like this:
-// -BitGo CEO Reveals Pending Acquisitions Amidst Abandoned Prime Trust Deal: BitGo terminated the acquisition of Prime Trust, raising questions about the stability and future of Prime Trust. The deal was expected to provide financial assistance to Prime Trust. 
-// -TrueUSD Depegs on Binance.US, Drops to 80 Cents Against Tether: TrueUSD depegged from its intended value and dropped in value against Tether. The stablecoin's reliance on Prime Trust raised concerns about its stability.
-// -Nevada’s Financial Watchdog Seeks Receivership of Crypto Custodian Prime Trust Amidst Insolvency: The Nevada Financial Institutions Division filed a petition to take control of Prime Trust and freeze all its businesses due to insolvency concerns. Prime Trust allegedly lost access to wallets and used customer assets to buy cryptocurrencies.
-//  ...
-// sources: source1, source2, etc..
+    let prompt = JSON.stringify(summaries)
+    console.log("Generating report..."); 
 
 
 
   try {
-    console.log("generating summmary for: ", companyName);
     const response = await openai.createChatCompletion({
       messages: [
-        { role: "system", content:"You are a helpful AI assistant" },
+        { role: "system", content: `
+        As an intern at a small VC firm, your task is to summarize the week's key events for our portfolio companies in an investor report.
+         Use the provided news log in JSON format as a reference. Craft your report with a focus on our investors' interests and explain the key points in layman's terms. 
+         Imagine you're telling a story of the week's events, weaving together the key developments into a coherent, concise narrative. Note that there may be events that are unrelated to the company, feel free to leave these out. 
+         Your response should be written in paragraph form, not bullet points. 
+
+        Address your email to Frank and Alfred, and sign your name as 'ChatGPT'. 
+
+        
+        ` },
         { role: "user", content: prompt },
       ],
       model: "gpt-3.5-turbo-16k",
     });
-    console.log("summary generated for: ", companyName);
-    return response.data.choices[0].message.content;
+    console.log("Report successfully generated."); 
+
+    return response.data.choices[0].message.content.replace(/\n/g, '<br>');
   } catch (error) {
-    console.log("ERROR GENERATING SUMMARY for: ", companyName);
+    console.log("ERROR GENERATING REPORT");
 
     console.error(error);
   }
 }
-function formatReports(summaries) {
-  let mergedReports = '<!DOCTYPE html>\n<html>\n<head>\n<style>\nbody {\nfont-family: Arial, sans-serif;\n}\n\nh1 {\ncolor: #333333;\nfont-size: 24px;\nfont-weight: bold;\nmargin-bottom: 10px;\n}\n\np {\ncolor: #666666;\nfont-size: 16px;\nline-height: 1.5;\n}\n</style>\n</head>\n<body>';
 
-  for (let company in summaries) {
-    mergedReports += summaries[company];
-  }
-
-  mergedReports += '\n</body>\n</html>';
-
-  return mergedReports;
-}
-
-
-
-
-async function getReport(req, res) {
-  try {
-    const articlesData = await getArticleData();
-    const groupedByCompany = _.groupBy(articlesData, "Company"); // Group the data by Company field
-
-    let reports = {};
-
-    // Iterate over each group
-    for (let company in groupedByCompany) {
-      const summary = await summarizeArticles(groupedByCompany[company],company);
-      reports[company] = summary;
-    }
-
-    const formattedReport = formatReports(reports);
-    let result = await sendEmail(formattedReport, req.body.emails)
-    res.send(result); // send the reports as the response
-    console.log("Done: ", result)
-
-
-
-  } catch (error) {
-    console.error(error);
-  }
-}
-
-
-
-async function sendEmail(html, emails) {
-  // Async function enables allows handling of promises with await
-  
-    // First, define send settings by creating a new transporter: 
-    let transporter = nodemailer.createTransport({
-      host: "smtp.gmail.com", // SMTP server address (usually mail.your-domain.com)
-      port: 465, // Port for SMTP (usually 465)
-      secure: true, // Usually true if connecting to port 465
-      auth: {
-        user: process.env.SENDER_EMAIL, // Your email address
-        pass: process.env.EMAIL_PASSWORD, // Password (for gmail, your app password)
-        // ⚠️ For better security, use environment variables set on the server for these values when deploying
-      },
-    });
-    
-    // Define and send message inside transporter.sendEmail() and await info about send from promise:
-    console.log("EMAILS: ", emails)
-    let info = await transporter.sendMail({
-      from: 'GateCap Automations <henryquillin@gmail.com>',
-      to: emails || 'alfred@gvmadvisors.com, henry@gvmadvisors.com',
-      subject: "Weekly Update (TEST)",
-      html: html
-    });
-  
-    return info.response; 
-  }
-
-  function truncateText(string, maxLength) {
-    if (string.length > maxLength) {
-      return string.substring(0, maxLength) + "...";
-    } else {
-      return string;
-    }
-  }
-  
 module.exports = { getReport };

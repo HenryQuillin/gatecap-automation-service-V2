@@ -4,7 +4,9 @@ const bodyParser = require("body-parser");
 const { getArticles } = require("./newsLog/getArticles");
 const { getInfo } = require("./getInfo/getInfo");
 const { getInfoAll } = require("./getInfo/getInfoAll");
+const { getArticleSummaries } = require("./newsLog/getArticleSummaries");
 const { getReport } = require("./newsLog/getReport");
+const { sendEmail } = require("./newsLog/sendEmail");
 
 const app = express();
 app.use(bodyParser.json({ limit: "10mb" }));
@@ -20,8 +22,12 @@ app.post("/extract", (req, res) => {
   getArticles(req, res);
 });
 
-app.post("/getReport", (req, res) => {
-  getReport(req, res);
+app.post("/getReport", async (req, res) => {
+  const [summaries, formattedSummaries] =  await getArticleSummaries(req, res);
+  const report = await getReport(summaries);
+  const finalReport = await report + "<br><hr><br><h1>Event Summaries</h1>" +formattedSummaries;
+  console.log(await sendEmail(finalReport, req.body.emails));
+  res.send(finalReport);
 });
 
 app.post("/getinfo", async (req, res) => {
