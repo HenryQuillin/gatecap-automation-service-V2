@@ -2,7 +2,7 @@ const Airtable = require("airtable");
 const cheerio = require("cheerio");
 const stringSimilarity = require("string-similarity");
 let table = "News Log";
-
+const { getTrackedCompanies } = require("./getTrackedCompanies");
 require("dotenv").config();
 
 // eslint-disable-next-line no-undef
@@ -21,20 +21,21 @@ const base = new Airtable({
   apiKey: AIRTABLE_API_KEY,
 }).base("appKfm9gouHkcTC42");
 
+
 async function getArticles(req, res) {
+
+
   const alertEmailURL =
     "https://mail.google.com/mail/u/3/#inbox/" + req.body.alertEmailID;
   const html = req.body.html;
   const $ = cheerio.load(html);
   const alertQueryString = getAlertQueryString(req.body.subject);
-  const company = getCompany(alertQueryString);
-  console.log("getArticles Request received for email " + req.body.alertEmailID);
+  const company = await getCompany(alertQueryString);
+  console.log(
+    "getArticles Request received for email " + req.body.alertEmailID
+  );
   console.log("Company: " + company);
 
-
-
-
-  
   let linkElements = $(
     "td:nth-child(2) > table > tbody > tr:nth-child(1) > td > a"
   );
@@ -52,7 +53,7 @@ async function getArticles(req, res) {
   );
 
   let articles = [];
-    console.log("Number of incoming articles: " + linkElements.length)
+  console.log("Number of incoming articles: " + linkElements.length);
   for (let i = 0; i < linkElements.length; i++) {
     let article = {
       type: "",
@@ -106,14 +107,18 @@ async function getArticles(req, res) {
       articles.push(article);
     }
   }
-  console.log("Number of new articles for " + articles[0].company + ": " + articles.length);
+  console.log(
+    "Number of new articles for " + articles[0].company + ": " + articles.length
+  );
 
   try {
     await updateAirtable(articles);
     res.json(articles);
   } catch (err) {
     console.error("Error in updateAirtable:", err);
-    res.status(500).json({ error: 'There was an error processing your request' });
+    res
+      .status(500)
+      .json({ error: "There was an error processing your request" });
   }
 }
 
@@ -140,23 +145,21 @@ async function updateAirtable(articles) {
 
 async function getExistingRecords() {
   let existingRecords = [];
-  console.log("TABLE: ", table)
+  console.log("TABLE: ", table);
   try {
     await base(table)
-    .select({
-      view: "Past week", // Specify the view here
-    })
-    .eachPage(function page(records, fetchNextPage) {
-      records.forEach(function (record) {
-        existingRecords.push(record);
+      .select({
+        view: "Past week", // Specify the view here
+      })
+      .eachPage(function page(records, fetchNextPage) {
+        records.forEach(function (record) {
+          existingRecords.push(record);
+        });
+        fetchNextPage();
       });
-      fetchNextPage();
-    });
-  }
-  catch (err) {
+  } catch (err) {
     console.error("Error in getExistingRecords records:", err);
   }
-
 
   return existingRecords;
 }
@@ -224,21 +227,17 @@ function updateRecord(record, article) {
           console.error("Error updating record:", err);
           return;
         }
-        console.log(
-          "Updated record:",
-          record.get("Title"),
-        );
+        console.log("Updated record:", record.get("Title"));
       }
     );
-  } catch (err) { 
+  } catch (err) {
     console.error("Error in updateRecord:", err);
   }
-
 }
 
 // Create a new record
 function createRecord(article) {
-  try{
+  try {
     base(table).create(
       {
         Company: article.company,
@@ -259,11 +258,9 @@ function createRecord(article) {
         console.log("Created record:", record.getId());
       }
     );
-  }
-  catch (err) { 
+  } catch (err) {
     console.error("Error in createRecord:", err);
   }
-
 }
 
 function getAlertQueryString(subject) {
@@ -276,18 +273,8 @@ function getAlertQueryString(subject) {
   }
 }
 
-function getCompany(alertQuery) {
-  const portfolioCompanies = [
-    "HamsaPay",
-    "Prime Trust",
-    "Figure",
-    "Decent DAO",
-    "Engiven",
-    "Provenance",
-    "RareMint",
-    "Banq",
-    "CoinRoutes",
-  ];
+async function getCompany(alertQuery) {
+  const portfolioCompanies = await getTrackedCompanies();
   let companyFound = null;
 
   portfolioCompanies.forEach((company) => {
@@ -298,6 +285,7 @@ function getCompany(alertQuery) {
 
   return companyFound;
 }
+
 function getDate(dateString) {
   // Create a new Date object
   var date = new Date(dateString.split(" | ")[0]);
@@ -320,8 +308,6 @@ function getDate(dateString) {
   // Return the formatted date and time
   return year + "-" + month + "-" + day;
 }
-
-
 
 module.exports = {
   getArticles: getArticles,
