@@ -1,4 +1,5 @@
 async function updateAirtableWithCompanyNotFoundError(base, recordID) {
+  console.log("Company not found on Crunchbase");
   base("Company Tracking").update([
     {
       id: recordID,

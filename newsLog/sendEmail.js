@@ -1,5 +1,6 @@
 const nodemailer = require("nodemailer");
 require("dotenv").config();
+const Airtable = require("airtable");
 
 
 async function sendEmail(html, emails) {
@@ -24,11 +25,52 @@ async function sendEmail(html, emails) {
       let info = await transporter.sendMail({
         from: 'GateCap Automations <henryquillin@gmail.com>',
         to: emails || 'alfred@gvmadvisors.com, henry@gvmadvisors.com',
-        subject: "Weekly Update (TEST)",
+        subject: "Weekly Update (TEST) - " + getDate(),
         html: html
       });
-    
+
+      updateAirtable(html)
       return info.response; 
+
     }
+
+async function updateAirtable(content) {
+  // eslint-disable-next-line no-undef
+  const apiKey = process.env.AIRTABLE_API_KEY;
+
+  var base = new Airtable({
+    apiKey: apiKey,
+  }).base("appKfm9gouHkcTC42");
+
+
+  try {
+    base("Weekly Reports").create(
+      {
+        "Name":"Weekly Update (TEST) - " + getDate(),
+        "Content": content,
+        "Group": "Portfolio"
+      },
+      function (err, record) {
+        if (err) {
+          console.error("Error creating record:", err);
+          return;
+        }
+        console.log("Created record:", record.getId());
+      }
+    );
+  } catch (err) {
+    console.error("Error in createRecord:", err);
+  }
+}
+
+function getDate() {
+  const date = new Date();
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0'); //January is 0!
+  const year = date.getFullYear();
+
+  return day + '-' + month + '-' + year;
+}
+
 
 module.exports = { sendEmail };
