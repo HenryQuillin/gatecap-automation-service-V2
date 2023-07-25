@@ -38,7 +38,7 @@ async function getReport(summaries) {
     });
     console.log("Report successfully generated."); 
 
-    return response.data.choices[0].message.content.replace(/\n/g, '<br>');
+    return response.data.choices[0].message.content;
   } catch (error) {
     console.log("ERROR GENERATING REPORT");
 

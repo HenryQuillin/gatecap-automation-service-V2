@@ -25,7 +25,7 @@ app.post("/extract", (req, res) => {
 app.post("/getReport", async (req, res) => {
   const [summaries, formattedSummaries] =  await getArticleSummaries(req, res);
   const report = await getReport(summaries);
-  const finalReport = await report + "<br><hr><br><h1>Event Summaries</h1>" +formattedSummaries;
+  const finalReport = await report + "\n \n EVENT SUMMARIES: \n" +formattedSummaries;
   console.log(await sendEmail(finalReport, req.body.emails));
   res.send(finalReport);
 });

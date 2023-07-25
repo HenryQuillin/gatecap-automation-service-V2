@@ -26,7 +26,7 @@ async function getArticles(req, res) {
 
 
   const alertEmailURL =
-    "https://mail.google.com/mail/u/3/#inbox/" + req.body.alertEmailID;
+    "https://mail.google.com/mail/u/0/#inbox/" + req.body.alertEmailID;
   const html = req.body.html;
   const $ = cheerio.load(html);
   const alertQueryString = getAlertQueryString(req.body.subject);
