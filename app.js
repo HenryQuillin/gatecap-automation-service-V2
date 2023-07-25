@@ -67,12 +67,10 @@ app.post("/getReport", async (req, res) => {
 
 // Note: This summary highlights the key events related to Prime Trust, focusing on the company's receivership, financial problems, regulatory challenges, and impacts on other industry players.
 
-
-
 //   `
   const docLink = await uploadToDocs(finalReport);
   await updateAirtable(docLink)
-  console.log(await sendEmail(finalReport, req.body.emails));
+  console.log(await sendEmail(docLink, req.body.emails));
   await sendTelegramMessage(docLink); 
   res.send(docLink);
 });

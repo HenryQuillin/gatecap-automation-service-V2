@@ -29,7 +29,7 @@ async function createReport(auth, content) {
     const drive = google.drive({ version: "v3", auth });
     const docs = google.docs({ version: "v1", auth });
 
-    const folderId = "1wo9-vrkRQjORZLkIWwunhPuYeyunuOrK";
+    const folderId = "1JfxG2o_ZzsiigDVKsDbKH2sqEB-bl6J7";
 
     const doc = await drive.files.create({
       requestBody: {
@@ -38,6 +38,7 @@ async function createReport(auth, content) {
         parents: [folderId],
       },
       fields: "id",
+      supportsAllDrives: true
     });
 
     await docs.documents.batchUpdate({
@@ -59,6 +60,7 @@ async function createReport(auth, content) {
     const docMeta = await drive.files.get({
       fileId: doc.data.id,
       fields: "webViewLink",
+      supportsAllDrives: true 
     });
 
     console.log(`Created new document with ID: ${doc.data.id}`);
