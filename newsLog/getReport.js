@@ -28,7 +28,6 @@ async function getReport(summaries) {
          Imagine you're telling a story of the week's events, weaving together the key developments into a coherent, concise narrative. Note that there may be events that are unrelated to the company, feel free to leave these out. 
          Your response should be written in paragraph form, not bullet points. 
 
-        Address your email to Frank and Alfred, and sign your name as 'ChatGPT'. 
 
         
         ` },

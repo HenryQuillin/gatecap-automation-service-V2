@@ -370,20 +370,7 @@ async function updateAirtableErrorDetails(recordID, error) {
   ]);
 }
 
-// function getDate() {
-//   const date = moment().tz("America/Chicago");
-//   let month = "" + (date.month() + 1); // Months are zero-indexed in moment.js
-//   let day = "" + date.date();
-//   let hour = "" + date.hours();
-//   let minute = "" + date.minutes();
 
-//   if (month.length < 2) month = "0" + month;
-//   if (day.length < 2) day = "0" + day;
-//   if (hour.length < 2) hour = "0" + hour;
-//   if (minute.length < 2) minute = "0" + minute;
-
-//   return `${month}-${day}-${hour}-${minute}`;
-// }
 
 module.exports = {
   getInfo: getInfoWrapper,
