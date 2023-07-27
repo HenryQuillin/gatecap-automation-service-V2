@@ -26,12 +26,12 @@ app.post("/extract", (req, res) => {
 });
 
 app.post("/getReport", async (req, res) => {
+  const isTest = req.body.production ? false : true;
   const [summaries, formattedSummaries] =  await getArticleSummaries(req, res);
   const report = await getReport(summaries);
   const finalReport = await report + "\n \n EVENT SUMMARIES: \n" +formattedSummaries;
 
-
-//   const finalReport = `
+// const finalReport = `
 //   Dear Frank and Alfred,
 
 // I hope this email finds you well. I wanted to provide you with a summary of the key events surrounding our portfolio company, Prime Trust, for the past week. It has been a challenging period for the company, with significant developments in its financial situation and regulatory challenges.
@@ -68,10 +68,10 @@ app.post("/getReport", async (req, res) => {
 // Note: This summary highlights the key events related to Prime Trust, focusing on the company's receivership, financial problems, regulatory challenges, and impacts on other industry players.
 
 //   `
-  const docLink = await uploadToDocs(finalReport);
-  await updateAirtable(docLink)
-  console.log(await sendEmail(docLink, req.body.emails));
-  await sendTelegramMessage(docLink); 
+  const docLink = await uploadToDocs(finalReport, isTest);
+  await updateAirtable(docLink, isTest)
+  console.log(await sendEmail(docLink, req.body.emails, isTest));
+  await sendTelegramMessage(docLink, isTest); 
   res.send(docLink);
 });
 

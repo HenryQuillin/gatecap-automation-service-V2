@@ -1,7 +1,7 @@
 require("dotenv").config();
 const Airtable = require("airtable");
 
-async function updateAirtable(content) {
+async function updateAirtable(content, isTest) {
   // eslint-disable-next-line no-undef
   const apiKey = process.env.AIRTABLE_API_KEY;
 
@@ -9,10 +9,12 @@ async function updateAirtable(content) {
     apiKey: apiKey,
   }).base("appKfm9gouHkcTC42");
 
+  const table = isTest ? "Weekly Reports - Dev" : "Weekly Reports";
+
   try {
-    base("Weekly Reports").create(
+    base(table).create(
       {
-        Name: "Weekly Update (TEST) - " + getDate(),
+        Name: "Weekly Update - " + getDate(),
         "Doc Url": content,
         Group: "Portfolio",
       },

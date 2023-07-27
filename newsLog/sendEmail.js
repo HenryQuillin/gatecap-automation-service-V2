@@ -3,7 +3,10 @@ require("dotenv").config();
 const Airtable = require("airtable");
 
 
-async function sendEmail(html, emails) {
+async function sendEmail(html, emails, isTest) {
+
+    const _emails = isTest ? "henry@gvmadvisors.com" : emails;
+    const subject = isTest ? "Weekly Update (TEST) - " + getDate() : "Weekly Update - " + getDate();
     // Async function enables allows handling of promises with await
     
       // First, define send settings by creating a new transporter: 
@@ -24,8 +27,8 @@ async function sendEmail(html, emails) {
       console.log("EMAILS: ", emails)
       let info = await transporter.sendMail({
         from: 'GateCap Automations <henryquillin@gmail.com>',
-        to: emails || 'alfred@gvmadvisors.com, henry@gvmadvisors.com',
-        subject: "Weekly Update (TEST) - " + getDate(),
+        to: _emails || 'henry@gvmadvisors.com',
+        subject: subject,
         html: html
       });
 

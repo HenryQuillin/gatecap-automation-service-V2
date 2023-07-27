@@ -2,20 +2,23 @@ const TelegramBot = require("node-telegram-bot-api");
 require("dotenv").config();
 
 const botToken = process.env.TELEGRAM_BOT_TOKEN;
-const chatId = process.env.HENRY_GATECAPBOT_CHATID;
 
-function sendTelegramMessage(url) {
+
+
+
+function sendTelegramMessage(url, isTest) {
   const bot = new TelegramBot(botToken);
-
+  const chatId = isTest ? process.env.HENRY_GATECAPBOT_CHATID : process.env.WEEKLY_REPORT_CHATID;
+  const messageTitle = isTest ? "Weekly Report (TEST)" : "Weekly Report";
   const message = `
-    🚨Weekly Report (test): ${getDate()}🚨
+    🚨${messageTitle}: ${getDate()}🚨
 
     ${url}
     `;
 
   if (url) {
     bot
-      .sendMessage("-941546216", message)
+      .sendMessage(chatId, message)
       .then(() => {
         console.log("Message sent successfully");
       })

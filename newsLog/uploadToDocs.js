@@ -1,7 +1,7 @@
 const { google } = require("googleapis");
 require("dotenv").config();
 
-async function uploadToDocs(content) {
+async function uploadToDocs(content, isTest) {
   try {
     const jwtClient = new google.auth.JWT(
       process.env.google_client_email,
@@ -18,18 +18,18 @@ async function uploadToDocs(content) {
 
     console.log("authorized");
 
-    return await createReport(jwtClient, content);
+    return await createReport(jwtClient, content, isTest);
   } catch (err) {
     console.error("Error in uploadToDocs:", err);
   }
 }
 
-async function createReport(auth, content) {
+async function createReport(auth, content, isTest) {
   try {
     const drive = google.drive({ version: "v3", auth });
     const docs = google.docs({ version: "v1", auth });
 
-    const folderId = "1JfxG2o_ZzsiigDVKsDbKH2sqEB-bl6J7";
+    const folderId = isTest ? "1ujWV7ZDOPKa9fNtO2mPFYokuaUdlQIVI" : "1JfxG2o_ZzsiigDVKsDbKH2sqEB-bl6J7";
 
     const doc = await drive.files.create({
       requestBody: {
