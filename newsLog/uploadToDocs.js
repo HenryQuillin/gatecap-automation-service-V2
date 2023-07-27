@@ -1,7 +1,12 @@
 const { google } = require("googleapis");
 require("dotenv").config();
 
+
+
 async function uploadToDocs(content, isTest) {
+
+  const google_private_key = process.env.google_private_key.replace(/\\n/g, "\n");
+  console.log(  google_private_key)
   try {
     const jwtClient = new google.auth.JWT(
       process.env.google_client_email,
