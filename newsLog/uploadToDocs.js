@@ -1,13 +1,9 @@
 const { google } = require("googleapis");
-require("dotenv").config();
-
-
+require("dotenv").config({ path: "/etc/secrets/.env" });
 
 async function uploadToDocs(content, isTest) {
+  // const google_private_key = process.env.google_private_key.replace(/\\n/g, "\n");
 
-  const google_private_key = process.env.google_private_key.replace(/\\n/g, "\n");
-
-  console.log(  google_private_key)
   try {
     const jwtClient = new google.auth.JWT(
       process.env.google_client_email,
@@ -35,7 +31,9 @@ async function createReport(auth, content, isTest) {
     const drive = google.drive({ version: "v3", auth });
     const docs = google.docs({ version: "v1", auth });
 
-    const folderId = isTest ? "1ujWV7ZDOPKa9fNtO2mPFYokuaUdlQIVI" : "1JfxG2o_ZzsiigDVKsDbKH2sqEB-bl6J7";
+    const folderId = isTest
+      ? "1ujWV7ZDOPKa9fNtO2mPFYokuaUdlQIVI"
+      : "1JfxG2o_ZzsiigDVKsDbKH2sqEB-bl6J7";
 
     const doc = await drive.files.create({
       requestBody: {
@@ -44,7 +42,7 @@ async function createReport(auth, content, isTest) {
         parents: [folderId],
       },
       fields: "id",
-      supportsAllDrives: true
+      supportsAllDrives: true,
     });
 
     await docs.documents.batchUpdate({
@@ -66,7 +64,7 @@ async function createReport(auth, content, isTest) {
     const docMeta = await drive.files.get({
       fileId: doc.data.id,
       fields: "webViewLink",
-      supportsAllDrives: true 
+      supportsAllDrives: true,
     });
 
     console.log(`Created new document with ID: ${doc.data.id}`);

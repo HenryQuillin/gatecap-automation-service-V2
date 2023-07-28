@@ -3,7 +3,7 @@ const cheerio = require("cheerio");
 const stringSimilarity = require("string-similarity");
 let table = "News Log";
 const { getTrackedCompanies } = require("./getTrackedCompanies");
-require("dotenv").config();
+require("dotenv").config({ path: "/etc/secrets/.env" });
 
 // eslint-disable-next-line no-undef
 let port = process.env.PORT;
@@ -21,10 +21,7 @@ const base = new Airtable({
   apiKey: AIRTABLE_API_KEY,
 }).base("appKfm9gouHkcTC42");
 
-
 async function getArticles(req, res) {
-
-
   const alertEmailURL =
     "https://mail.google.com/mail/u/0/#inbox/" + req.body.alertEmailID;
   const html = req.body.html;
@@ -94,8 +91,7 @@ async function getArticles(req, res) {
         .trim()
         .toLowerCase();
     }
-    compareArticles(articles, article)
-
+    compareArticles(articles, article);
   }
   console.log(
     "Number of new articles for " + articles[0].company + ": " + articles.length
@@ -113,8 +109,8 @@ async function getArticles(req, res) {
 }
 
 function compareArticles(articles, newArticle) {
-  console.log("Articles: ", articles)
-  console.log("newArticle: ", newArticle)
+  console.log("Articles: ", articles);
+  console.log("newArticle: ", newArticle);
   let similarArticleIndex = articles.findIndex((previousArticle) =>
     isSimilar(previousArticle, newArticle)
   );
@@ -127,7 +123,6 @@ function compareArticles(articles, newArticle) {
     articles.push(newArticle);
   }
 }
-
 
 // Adjust the function updateAirtable to include the comparison logic:
 async function updateAirtable(articles) {
@@ -319,5 +314,5 @@ function getDate(dateString) {
 module.exports = {
   getArticles: getArticles,
   compareArticles,
-  isSimilar
+  isSimilar,
 };

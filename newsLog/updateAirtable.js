@@ -1,4 +1,4 @@
-require("dotenv").config();
+require("dotenv").config({ path: "/etc/secrets/.env" });
 const Airtable = require("airtable");
 
 async function updateAirtable(content, isTest) {

@@ -1,7 +1,7 @@
 const Airtable = require("airtable");
 const axios = require("axios");
 const puppeteer = require("puppeteer-extra");
-require("dotenv").config();
+require("dotenv").config({ path: "/etc/secrets/.env" });
 // const { uploadFile } = require("./uploadFile");
 const moment = require("moment-timezone");
 const { updateAirtableWithCompanyNotFoundError } = require("./helpers");
@@ -369,8 +369,6 @@ async function updateAirtableErrorDetails(recordID, error) {
     },
   ]);
 }
-
-
 
 module.exports = {
   getInfo: getInfoWrapper,
