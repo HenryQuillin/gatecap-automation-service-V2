@@ -1,5 +1,5 @@
 const { Configuration, OpenAIApi } = require("openai");
-require("dotenv").config({ path: "/etc/secrets/.env" });
+require("dotenv").config();
 const configuration = new Configuration({
   // eslint-disable-next-line no-undef
   apiKey: process.env.GPT_API_KEY,

@@ -1,5 +1,5 @@
 const { google } = require("googleapis");
-require("dotenv").config({ path: "/etc/secrets/.env" });
+require("dotenv").config();
 
 async function uploadToDocs(content, isTest) {
   // const google_private_key = process.env.google_private_key.replace(/\\n/g, "\n");

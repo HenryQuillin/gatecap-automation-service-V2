@@ -1,5 +1,5 @@
 const nodemailer = require("nodemailer");
-require("dotenv").config({ path: "/etc/secrets/.env" });
+require("dotenv").config();
 const Airtable = require("airtable");
 
 async function sendEmail(html, emails, isTest) {

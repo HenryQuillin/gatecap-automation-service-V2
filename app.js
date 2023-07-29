@@ -28,9 +28,9 @@ app.post("/extract", (req, res) => {
 
 app.post("/getReport", async (req, res) => {
   const isTest = req.body.production ? false : true;
-  // const [summaries, formattedSummaries] =  await getArticleSummaries(req, res);
-  // const report = await getReport(summaries);
-  // const finalReport = await report + "\n \n EVENT SUMMARIES: \n" +formattedSummaries;
+  const [summaries, formattedSummaries] =  await getArticleSummaries(req, res);
+  const report = await getReport(summaries);
+  const finalReport = await report + "\n \n EVENT SUMMARIES: \n" +formattedSummaries;
 
   const docLink = await uploadToDocs(finalReport, isTest);
   await updateAirtable(docLink, isTest)

@@ -1,6 +1,6 @@
 const AIRTABLE_API_KEY = process.env.AIRTABLE_API_KEY;
 const Airtable = require("airtable");
-require("dotenv").config({ path: "/etc/secrets/.env" });
+require("dotenv").config();
 
 const base = new Airtable({
   apiKey: AIRTABLE_API_KEY,
