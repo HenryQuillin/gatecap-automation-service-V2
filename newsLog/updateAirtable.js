@@ -1,4 +1,8 @@
-require("dotenv").config();
+if (process.env.PORT == null || process.env.PORT == "") {
+  require("dotenv").config();
+} else {
+  require("dotenv").config({ path: "/etc/secrets/.env" });
+}
 const Airtable = require("airtable");
 
 async function updateAirtable(content, isTest) {

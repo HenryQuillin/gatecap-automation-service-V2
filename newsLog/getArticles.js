@@ -3,7 +3,11 @@ const cheerio = require("cheerio");
 const stringSimilarity = require("string-similarity");
 let table = "News Log";
 const { getTrackedCompanies } = require("./getTrackedCompanies");
-require("dotenv").config();
+if (process.env.PORT == null || process.env.PORT == "") {
+  require("dotenv").config();
+} else {
+  require("dotenv").config({ path: "/etc/secrets/.env" });
+}
 
 // eslint-disable-next-line no-undef
 let port = process.env.PORT;

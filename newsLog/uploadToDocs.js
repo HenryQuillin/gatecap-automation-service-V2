@@ -1,5 +1,9 @@
 const { google } = require("googleapis");
-require("dotenv").config();
+if (process.env.PORT == null || process.env.PORT == "") {
+  require("dotenv").config();
+} else {
+  require("dotenv").config({ path: "/etc/secrets/.env" });
+}
 
 async function uploadToDocs(content, isTest) {
   // const google_private_key = process.env.google_private_key.replace(/\\n/g, "\n");

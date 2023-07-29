@@ -1,5 +1,9 @@
 const { Configuration, OpenAIApi } = require("openai");
-require("dotenv").config();
+if (process.env.PORT == null || process.env.PORT == "") {
+  require("dotenv").config();
+} else {
+  require("dotenv").config({ path: "/etc/secrets/.env" });
+}
 const configuration = new Configuration({
   // eslint-disable-next-line no-undef
   apiKey: process.env.GPT_API_KEY,

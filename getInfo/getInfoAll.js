@@ -1,7 +1,11 @@
 const Airtable = require("airtable");
 // const axios = require("axios");
 const puppeteer = require("puppeteer-extra");
-require("dotenv").config();
+if (process.env.PORT == null || process.env.PORT == "") {
+  require("dotenv").config();
+} else {
+  require("dotenv").config({ path: "/etc/secrets/.env" });
+}
 const { uploadFile } = require("./uploadFile");
 const moment = require("moment-timezone");
 const {
