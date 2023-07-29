@@ -14,7 +14,6 @@ const { finalReport } = require("./newsLog/finalReport");
 const { getArticleData } = require("./newsLog/getArticleData");
 const { reports } = require("./newsLog/testReports");
 
-
 const _ = require("lodash");
 const app = express();
 app.use(bodyParser.json({ limit: "10mb" }));
@@ -44,10 +43,12 @@ app.post("/getReport", async (req, res) => {
     );
     const report = await getReport(summaries);
     const finalReport =
-      `REPORT FOR COMPANIES WITH DILIGENCE STATUS ${articleData}: \n` + report + "\n \n EVENT SUMMARIES: \n" + formattedSummaries;
-      reports.push(finalReport);
+      `REPORT FOR COMPANIES WITH DILIGENCE STATUS ${articleData}: \n` +
+      report +
+      "\n \n Bullet point summaries: : \n" +
+      formattedSummaries;
+    reports.push(finalReport);
   }
-
 
   const finalReport = reports.join("\n \n");
   const docLink = await uploadToDocs(finalReport, isTest);

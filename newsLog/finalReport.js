@@ -19,7 +19,7 @@ Lastly, Centrifuge, which facilitates loans connecting traditional finance with 
 
 In summary, this week brought both positive and challenging developments for our portfolio companies. While HamsaPay received recognition at a prestigious event, Engiven expanded its partnership to offer new giving options. On the other hand, Prime Trust faced financial difficulties, Provenance Blockchain experienced a decrease in token value, and Centrifuge witnessed a temporary suspension of lending. Meanwhile, Figure Technologies and CoinRoutes continued to make progress in their respective markets. Overall, the crypto, blockchain, and fintech industries are evolving rapidly, presenting both opportunities and obstacles for our portfolio companies.
  
- EVENT SUMMARIES: 
+ Bullet point summaries: : 
 HamsaPay:
 - HamsaPay was mentioned as one of the companies participating in the Startup Battlefield at TechCrunch Disrupt 2023.
 - The article also mentioned some of the judges for the event, including individuals who have worked at Facebook and have experience in blockchain, cryptocurrencies, and decentralized technology.
