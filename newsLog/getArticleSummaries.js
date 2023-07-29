@@ -17,17 +17,7 @@ const configuration = new Configuration({
 });
 const openai = new OpenAIApi(configuration);
 
-async function getArticleData() {
-  try {
-    const json = await axios.get(
-      "https://api.csvgetter.com/files/f0bc117df8?type=json_records&cols=Title,Company,Content Preview,Links"
-    );
-    const res = json.data;
-    return res;
-  } catch (error) {
-    console.error(error);
-  }
-}
+
 
 async function summarizeArticles(articleData, companyName) {
   // let articles = articleData.map(article => `${article.Title}: ${article['Content Preview']}`).join("\n");
@@ -77,10 +67,10 @@ function formatReports(data) {
   return formattedData;
 }
 
-async function getArticleSummaries() {
+async function getArticleSummaries(articlesData) {
   try {
-    const articlesData = await getArticleData();
-    const groupedByCompany = _.groupBy(articlesData, "Company"); // Group the data by Company field
+    // const articlesData = await getArticleData();
+    const groupedByCompany = _.groupBy(articlesData, "Company");
 
     let reports = {};
 

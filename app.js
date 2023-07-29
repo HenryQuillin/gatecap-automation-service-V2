@@ -11,7 +11,11 @@ const { sendTelegramMessage } = require("./newsLog/sendTelegramMessage");
 const { uploadToDocs } = require("./newsLog/uploadToDocs");
 const { updateAirtable } = require("./newsLog/updateAirtable");
 const { finalReport } = require("./newsLog/finalReport");
+const { getArticleData } = require("./newsLog/getArticleData");
+const { reports } = require("./newsLog/testReports");
 
+
+const _ = require("lodash");
 const app = express();
 app.use(bodyParser.json({ limit: "10mb" }));
 
@@ -28,14 +32,28 @@ app.post("/extract", (req, res) => {
 
 app.post("/getReport", async (req, res) => {
   const isTest = req.body.production ? false : true;
-  const [summaries, formattedSummaries] =  await getArticleSummaries(req, res);
-  const report = await getReport(summaries);
-  const finalReport = await report + "\n \n EVENT SUMMARIES: \n" +formattedSummaries;
+  const allArticleData = await getArticleData();
+  const groupedByDiligenceStatus = _.groupBy(
+    allArticleData,
+    "Diligence Status"
+  );
+  const reports = [];
+  for (let articleData in groupedByDiligenceStatus) {
+    const [summaries, formattedSummaries] = await getArticleSummaries(
+      groupedByDiligenceStatus[articleData]
+    );
+    const report = await getReport(summaries);
+    const finalReport =
+      `REPORT FOR COMPANIES WITH DILIGENCE STATUS ${articleData}: \n` + report + "\n \n EVENT SUMMARIES: \n" + formattedSummaries;
+      reports.push(finalReport);
+  }
 
+
+  const finalReport = reports.join("\n \n");
   const docLink = await uploadToDocs(finalReport, isTest);
-  await updateAirtable(docLink, isTest)
+  await updateAirtable(docLink, isTest);
   console.log(await sendEmail(docLink, req.body.emails, isTest));
-  await sendTelegramMessage(docLink, isTest); 
+  await sendTelegramMessage(docLink, isTest);
   res.send(docLink);
 });
 

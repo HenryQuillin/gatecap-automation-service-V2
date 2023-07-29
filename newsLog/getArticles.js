@@ -35,7 +35,7 @@ async function getArticles(req, res) {
   console.log(
     "getArticles Request received for email " + req.body.alertEmailID
   );
-  console.log("Company: " + company);
+  console.log("Company: " + company.name);
 
   let linkElements = $(
     "td:nth-child(2) > table > tbody > tr:nth-child(1) > td > a"
@@ -62,7 +62,8 @@ async function getArticles(req, res) {
       content_preview: $(previewElements[i]).text(),
       source: $(sourceElements[i]).text(),
       links: $(linkElements[i]).attr("href"),
-      company: company,
+      company: company.name,
+      companyRecordId: company.id,
       alertQueryString: alertQueryString,
       alertEmailURL: alertEmailURL,
       date: getDate($(dateElements[i]).text()),
@@ -242,31 +243,67 @@ function updateRecord(record, article) {
 }
 
 // Create a new record
-function createRecord(article) {
+async function createRecord(article) {
   try {
-    base(table).create(
-      {
-        Company: article.company,
-        "Alert Query String": article.alertQueryString,
-        Type: article.type,
-        Title: article.title,
-        "Content Preview": article.content_preview,
-        Source: article.source,
-        Links: article.Links,
-        "Alert Email URL": article.alertEmailURL,
-        Date: article.date,
-      },
-      function (err, record) {
-        if (err) {
-          console.error("Error creating record:", err);
-          return;
+    // Fetch the record ID of the company in the 'Company Tracking' table
+    const companyRecord = await getCompanyRecordId(article.company);
+
+    // If the company was found in the 'Company Tracking' table
+    if (companyRecord) {
+      // Create the new record
+      base(table).create(
+        {
+          Company: article.company,
+          "Alert Query String": article.alertQueryString,
+          Type: article.type,
+          Title: article.title,
+          "Content Preview": article.content_preview,
+          Source: article.source,
+          Links: article.Links,
+          "Alert Email URL": article.alertEmailURL,
+          Date: article.date,
+          "Linked Company": [article.companyRecordId], // Use the record ID as the value for the 'Linked Company' field
+        },
+        function (err, record) {
+          if (err) {
+            console.error("Error creating record:", err);
+            return;
+          }
+          console.log("Created record:", record.getId());
         }
-        console.log("Created record:", record.getId());
-      }
-    );
+      );
+    } else {
+      console.error(
+        "Company not found in 'Company Tracking' table:",
+        article.company
+      );
+    }
   } catch (err) {
     console.error("Error in createRecord:", err);
   }
+}
+
+async function getCompanyRecordId(companyName) {
+  return new Promise((resolve, reject) => {
+    base("Company Tracking")
+      .select({
+        maxRecords: 1,
+        filterByFormula: `{Name} = '${companyName}'`,
+      })
+      .firstPage((err, records) => {
+        if (err) {
+          console.error("Error fetching company record:", err);
+          reject(err);
+          return;
+        }
+
+        if (records.length > 0) {
+          resolve(records[0].getId()); // Return the record ID
+        } else {
+          resolve(null); // No matching company found
+        }
+      });
+  });
 }
 
 function getAlertQueryString(subject) {
@@ -278,20 +315,25 @@ function getAlertQueryString(subject) {
     return null;
   }
 }
-
 async function getCompany(alertQuery) {
   const portfolioCompanies = await getTrackedCompanies();
   let companyFound = null;
 
   portfolioCompanies.forEach((company) => {
-    if (alertQuery.toLowerCase().includes(company.toLowerCase())) {
-      companyFound = company;
+    if (alertQuery.toLowerCase().includes(company.name.toLowerCase())) {
+      companyFound = company; // Return the company object with both name and id
     }
   });
+  if (companyFound === null) {
+    console.error("Company not found in 'Company Tracking' table:", alertQuery);
+    throw new Error(
+      "Company not found in 'Company Tracking' table:",
+      alertQuery
+    );
+  }
 
   return companyFound;
 }
-
 function getDate(dateString) {
   // Create a new Date object
   var date = new Date(dateString.split(" | ")[0]);

@@ -10,6 +10,7 @@ const base = new Airtable({
   apiKey: AIRTABLE_API_KEY,
 }).base("appKfm9gouHkcTC42");
 
+
 const getTrackedCompanies = async () => {
   const view = "Track News";
   const tableName = "Company Tracking";
@@ -19,7 +20,11 @@ const getTrackedCompanies = async () => {
     .select({ view: view })
     .eachPage((records, fetchNextPage) => {
       records.forEach((record) => {
-        companies.push(record.get("Name")); // Replace 'Company Name' with the actual field name in your Airtable
+        // Return an object with both the company name and its record ID
+        companies.push({
+          name: record.get("Name"),  // Replace 'Name' with the actual field name in your Airtable
+          id: record.id
+        });
       });
       fetchNextPage();
     });
