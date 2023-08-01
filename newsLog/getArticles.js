@@ -259,7 +259,7 @@ async function createRecord(article) {
           Title: article.title,
           "Content Preview": article.content_preview,
           Source: article.source,
-          Links: article.Links,
+          Links: article.links,
           "Alert Email URL": article.alertEmailURL,
           Date: article.date,
           "Linked Company": [article.companyRecordId], // Use the record ID as the value for the 'Linked Company' field
