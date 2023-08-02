@@ -262,7 +262,7 @@ async function createRecord(article) {
           Links: article.links,
           "Alert Email URL": article.alertEmailURL,
           Date: article.date,
-          "Linked Company": [article.companyRecordId], // Use the record ID as the value for the 'Linked Company' field
+          "Link to Company Tracking": [article.companyRecordId], // Use the record ID as the value for the 'Linked Company' field
         },
         function (err, record) {
           if (err) {

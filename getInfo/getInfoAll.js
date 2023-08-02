@@ -21,9 +21,6 @@ const apiKey = process.env.AIRTABLE_API_KEY;
 
 const Queue = require("better-queue");
 
-// ...
-
-// queue.js
 
 const getInfoQueue = new Queue(getInfo, {
   concurrent: 1, // process tasks one at a time
