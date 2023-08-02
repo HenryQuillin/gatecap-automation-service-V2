@@ -45,8 +45,9 @@ app.post("/getReport", async (req, res) => {
     const finalReport =
       `REPORT FOR COMPANIES WITH DILIGENCE STATUS ${articleData}: \n` +
       report +
-      "\n \n Bullet point summaries: : \n" + "\n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n " 
-      formattedSummaries;
+      "\n \n Bullet point summaries: : \n" +
+      formattedSummaries +
+      "\n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n ";
     reports.push(finalReport);
   }
 
