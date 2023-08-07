@@ -31,7 +31,7 @@ async function getInfoWrapper(req, res) {
   // Add a job to the queue
   getInfoQueue.push(req.body);
 
-  res.status(200).send("Request received. Attempting to scrape data");
+  res.status(200).send("Recieved request. Scraping info for all companies in 'Get Info Batch Queue' table");
   console.log("Request received. Attempting to scrape data for", "...");
 }
 
