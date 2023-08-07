@@ -269,7 +269,6 @@ async function getBasicInfo(permalink) {
     let description = data.properties.short_description || "—";
     let dataToReturn = {
       Website: websiteUrl,
-      "Logo URL": imageUrl,
       Linkedin: linkedin,
       Facebook: facebook,
       Twitter: twitter,
