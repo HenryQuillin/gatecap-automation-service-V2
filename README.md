@@ -1,4 +1,32 @@
-## Overview
+# Table of Contents
+
+- [Overview](#overview)
+  * [Key Features](#key-features)
+  * [Quick Links](#quick-links)
+- [Dependencies](#dependencies)
+  * [Core](#core)
+  * [Utilities](#utilities)
+  * [APIs](#apis)
+  * [Tools](#tools)
+- [How to Run Locally](#how-to-run-locally)
+- [Testing](#testing)
+  * [Unit Tests](#unit-tests)
+- [Deployment](#deployment)
+- [Monitoring and Logging](#monitoring-and-logging)
+- [API Schema](#api-schema)
+- [Automated Info Gathering](#automated-info-gathering)
+  * [Overview](#overview-1)
+  * [Process](#process)
+  * [Error Handling](#error-handling)
+  * [Data Retrieved](#data-retrieved)
+  * [How to Add/Remove Fields](#how-to-addremove-fields-from-the-automated-info-gathering)
+- [Automated Info Gathering (Batch)](#automated-info-gathering-batch)
+- [Automated News Log](#automated-news-log)
+
+
+
+
+# Overview
 
 The service provides the following key features:
 
@@ -8,7 +36,7 @@ The service provides the following key features:
 - Telegram bot integration for new lead capture
 - Email to Airtable automation for new leads
 
-## Quick Links 
+# Quick Links 
 
 - [Company Tracking](https://airtable.com/appKfm9gouHkcTC42/tbld5FiqYEYa2pR3t/viwiWetaPfmwLGDhy?blocks=hide)
 - [Contacts](https://airtable.com/appKfm9gouHkcTC42/tblk8xCErGVGlFfia/viwGqiL1imOZPDjj6?blocks=hide)
