@@ -153,15 +153,15 @@ async function scrapePage(recordName, record) {
         //   page.click(".login"),
         // ]);
 
-        await page.waitForSelector('.mat-input-element', { timeout: 10000 });
+        await page.waitForSelector('.mat-input-element', { timeout: 120000 });
 
-        let inputs = await page.$$('.mat-input-element');
+        let inputs = await page.$$('.mat-input-element', { timeout: 120000 });
         
         await inputs[1].type("alfred@gate-cap.com");  // for username
         await inputs[2].type("KVVE@9810Fm6pKs4");     // for password
     
         await Promise.all([
-            page.waitForNavigation({ waitUntil: "load" }),
+            page.waitForNavigation({ waitUntil: "load",  timeout: 120000 }),
             page.click(".login"),
         ]);
 
