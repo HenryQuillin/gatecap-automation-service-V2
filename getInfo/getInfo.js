@@ -192,6 +192,8 @@ async function scrapePage(recordName, record) {
         console.log("pressed enter for ", recordName);
 
         await page.waitForSelector("mat-progress-bar", { hidden: true });
+        await page.waitForTimeout(3000);  // Wait for 3 seconds (300
+
 
         console.log("Scraping page for", recordName, "...");
 
