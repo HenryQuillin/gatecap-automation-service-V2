@@ -305,7 +305,6 @@ async function getBasicInfo(permalink) {
           filename: "Logo",
         },
       ],
-      "Diligence Status": "Pending",
       "Scraping Status": "Basic Info Only",
     };
     return dataToReturn;
