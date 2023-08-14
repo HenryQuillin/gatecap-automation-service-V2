@@ -97,9 +97,16 @@ async function getInfo(body, cb) {
     }
 
     if (data2) {
+      data1["Scraping Status"] = "Success";
+
       const data = { ...data1, ...data2 };
       console.log(data);
       await updateAirtable(data, body.newlyAddedRecordID);
+    } else {
+      data1["Scraping Status"] = "Error: Only basic info retrieved";
+      data1["Error Details"] =
+        "Could not scrape data. Only basic info retrieved.";
+      await updateAirtable(data1, body.newlyAddedRecordID);
     }
     cb(null, "done");
   } catch (error) {
@@ -144,7 +151,7 @@ async function scrapePage(recordName, record) {
       try {
         // await page.waitForSelector("#mat-input-1", { timeout: 10000 });
         // await page.waitForSelector("#mat-input-2");
-        
+
         // await page.type("#mat-input-1", "alfred@gate-cap.com");
         // await page.type("#mat-input-2", "KVVE@9810Fm6pKs4");
 
@@ -153,30 +160,30 @@ async function scrapePage(recordName, record) {
         //   page.click(".login"),
         // ]);
 
-        await page.waitForSelector('.mat-input-element', { timeout: 120000 });
+        await page.waitForSelector(".mat-input-element", { timeout: 120000 });
 
-        let inputs = await page.$$('.mat-input-element', { timeout: 120000 });
-        
-        await inputs[1].type("alfred@gate-cap.com");  // for username
-        await inputs[2].type("KVVE@9810Fm6pKs4");     // for password
-    
+        let inputs = await page.$$(".mat-input-element", { timeout: 120000 });
+
+        await inputs[1].type("alfred@gate-cap.com"); // for username
+        await inputs[2].type("KVVE@9810Fm6pKs4"); // for password
+
         await Promise.all([
-            page.waitForNavigation({ waitUntil: "load",  timeout: 120000 }),
-            page.click(".login"),
+          page.waitForNavigation({ waitUntil: "load", timeout: 120000 }),
+          page.click(".login"),
         ]);
 
         console.log("logged in for", recordName);
 
         await page.goto(
-          "https://www.crunchbase.com/discover/saved/view-for-automation/2fe3a89b-0a52-4f11-b3e7-b7ec2777f00a", { timeout: 60000 }
+          "https://www.crunchbase.com/discover/saved/view-for-automation/2fe3a89b-0a52-4f11-b3e7-b7ec2777f00a",
+          { timeout: 60000 }
         );
 
         console.log("at company discover page for ", recordName);
 
         // await page.type("#mat-input-1", recordName);
-        inputs = await page.$$('.mat-input-element');
+        inputs = await page.$$(".mat-input-element");
         await inputs[1].type(recordName);
-
 
         console.log("typed company name for ", recordName);
 
@@ -342,7 +349,7 @@ async function updateAirtable(data, recordID) {
     [
       {
         id: recordID,
-        fields: { ...data, "Scraping Status": "Success" },
+        fields: { ...data },
       },
     ],
     function (err, records) {
