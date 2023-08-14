@@ -244,7 +244,7 @@ async function scrapePage(recordName, record) {
         console.error("ERROR CAUGHT:" + error);
         throw error;
       } finally {
-        await page.close();
+        await browser.close();
       }
     });
 }
