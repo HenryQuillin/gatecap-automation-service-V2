@@ -142,28 +142,41 @@ async function scrapePage(recordName, record) {
       console.log("at login for ", recordName);
 
       try {
-        await page.waitForSelector("#mat-input-1", { timeout: 10000 });
-        await page.waitForSelector("#mat-input-2");
-        await page.type("#mat-input-1", "alfred@gate-cap.com");
-        await page.type("#mat-input-2", "KVVE@9810Fm6pKs4");
+        // await page.waitForSelector("#mat-input-1", { timeout: 10000 });
+        // await page.waitForSelector("#mat-input-2");
+        
+        // await page.type("#mat-input-1", "alfred@gate-cap.com");
+        // await page.type("#mat-input-2", "KVVE@9810Fm6pKs4");
 
+        // await Promise.all([
+        //   page.waitForNavigation({ waitUntil: "load" }),
+        //   page.click(".login"),
+        // ]);
+
+        await page.waitForSelector('.mat-input-element', { timeout: 10000 });
+
+        let inputs = await page.$$('.mat-input-element');
+        
+        await inputs[1].type("alfred@gate-cap.com");  // for username
+        await inputs[2].type("KVVE@9810Fm6pKs4");     // for password
+    
         await Promise.all([
-          page.waitForNavigation({ waitUntil: "load" }),
-          page.click(".login"),
+            page.waitForNavigation({ waitUntil: "load" }),
+            page.click(".login"),
         ]);
 
         console.log("logged in for", recordName);
 
         await page.goto(
-          "https://www.crunchbase.com/discover/saved/view-for-automation/2fe3a89b-0a52-4f11-b3e7-b7ec2777f00a"
+          "https://www.crunchbase.com/discover/saved/view-for-automation/2fe3a89b-0a52-4f11-b3e7-b7ec2777f00a", { timeout: 60000 }
         );
 
         console.log("at company discover page for ", recordName);
 
-        const inputs = await page.$$('.mat-input-element');
+        // await page.type("#mat-input-1", recordName);
+        inputs = await page.$$('.mat-input-element');
         await inputs[1].type(recordName);
 
-        // await page.type("#mat-input-1", recordName);
 
         console.log("typed company name for ", recordName);
 
