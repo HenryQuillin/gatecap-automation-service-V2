@@ -160,7 +160,10 @@ async function scrapePage(recordName, record) {
 
         console.log("at company discover page for ", recordName);
 
-        await page.type("#mat-input-1", recordName);
+        const inputs = await page.$$('.mat-input-element');
+        await inputs[1].type(recordName);
+
+        // await page.type("#mat-input-1", recordName);
 
         console.log("typed company name for ", recordName);
 
