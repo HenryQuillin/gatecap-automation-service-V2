@@ -19,8 +19,7 @@ async function updateAirtable(content, isTest) {
     base(table).create(
       {
         Name: "Weekly Update - " + getDate(),
-        "Doc Url": content,
-        Group: "Portfolio",
+        "Doc Url": content
       },
       function (err, record) {
         if (err) {
