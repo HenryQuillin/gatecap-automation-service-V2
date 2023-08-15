@@ -6,7 +6,7 @@ if (process.env.PORT == null || process.env.PORT == "") {
 } else {
   require("dotenv").config({ path: "/etc/secrets/.env" });
 }
-// const { uploadFile } = require("./uploadFile");
+const { uploadFile } = require("./uploadFile");
 const moment = require("moment-timezone");
 const { updateAirtableWithCompanyNotFoundError } = require("./helpers");
 
@@ -116,7 +116,7 @@ async function getInfo(body, cb) {
 }
 
 async function scrapePage(recordName, record) {
-  // const folderName = getDate();
+  const folderName = getDate();
 
   puppeteer.use(pluginStealth());
   return puppeteer
@@ -143,6 +143,7 @@ async function scrapePage(recordName, record) {
 
       await page.setViewport({ width: 1920, height: 1080 });
 
+
       await page.goto("https://www.crunchbase.com/login", {
         waitUntil: "load",
       });
@@ -150,30 +151,34 @@ async function scrapePage(recordName, record) {
       console.log("at login for ", recordName);
 
       try {
-        // await page.waitForSelector("#mat-input-1", { timeout: 10000 });
-        // await page.waitForSelector("#mat-input-2");
+        await page.waitForSelector("#mat-input-1", { timeout: 10000 });
+        await page.waitForSelector("#mat-input-2");
 
-        // await page.type("#mat-input-1", "alfred@gate-cap.com");
-        // await page.type("#mat-input-2", "KVVE@9810Fm6pKs4");
-
-        // await Promise.all([
-        //   page.waitForNavigation({ waitUntil: "load" }),
-        //   page.click(".login"),
-        // ]);
-
-        await page.waitForSelector(".mat-input-element", { timeout: 120000 });
-
-        let inputs = await page.$$(".mat-input-element", { timeout: 120000 });
-
-        await inputs[1].type("alfred@gate-cap.com"); // for username
-        await inputs[2].type("KVVE@9810Fm6pKs4"); // for password
+        await page.type("#mat-input-1", "alfred@gate-cap.com");
+        await page.type("#mat-input-2", "KVVE@9810Fm6pKs4");
 
         await Promise.all([
-          page.waitForNavigation({ waitUntil: "load", timeout: 120000 }),
+          page.waitForNavigation({ waitUntil: "load" }),
           page.click(".login"),
         ]);
 
+        // await page.waitForSelector(".mat-input-element", { timeout: 120000 });
+
+        // let inputs = await page.$$(".mat-input-element", { timeout: 120000 });
+
+        // await inputs[1].type("alfred@gate-cap.com"); // for username
+        // await inputs[2].type("KVVE@9810Fm6pKs4"); // for password
+
+        // await page.waitForTimeout(3000);
+
+        // await Promise.all([
+        //   page.waitForNavigation({ waitUntil: "load", timeout: 120000 }),
+        //   page.click(".login"),
+        // ]);
+
         console.log("logged in for", recordName);
+        // await page.screenshot({ path: path + "2-logged-in.png" });
+        // uploadFile(path + "2-logged-in.png", "2-logged-in.png", folderName);
 
         await page.goto(
           "https://www.crunchbase.com/discover/saved/view-for-automation/2fe3a89b-0a52-4f11-b3e7-b7ec2777f00a",
@@ -212,6 +217,8 @@ async function scrapePage(recordName, record) {
             return validElements;
           }
         );
+        // await page.screenshot({ path: path + "6-discover-page.png" });
+        // uploadFile(path + "6-discover-page.png", "6-discover-page.png", folderName);
 
         let rowNumber = await getRowNumber(page, recordName);
         if (!rowNumber) {
@@ -240,13 +247,14 @@ async function scrapePage(recordName, record) {
         }
         return res;
       } catch (error) {
-        await page.screenshot({ path: path + "7-catch-block.png" });
+        // await page.screenshot({ path: path + "7-catch-block.png" });
         // uploadFile(path + "7-catch-block.png", "7-catch-block.png", folderName);
         console.log("PAGE H1:");
         console.log(await page.evaluate(() => document.title));
         console.error("ERROR CAUGHT:" + error);
         throw error;
       } finally {
+        await page.close(); 
         await browser.close();
       }
     });
@@ -401,3 +409,19 @@ async function updateAirtableErrorDetails(recordID, error) {
 module.exports = {
   getInfo: getInfoWrapper,
 };
+
+
+function getDate() {
+  const date = moment().tz("America/Chicago");
+  let month = "" + (date.month() + 1); // Months are zero-indexed in moment.js
+  let day = "" + date.date();
+  let hour = "" + date.hours();
+  let minute = "" + date.minutes();
+
+  if (month.length < 2) month = "0" + month;
+  if (day.length < 2) day = "0" + day;
+  if (hour.length < 2) hour = "0" + hour;
+  if (minute.length < 2) minute = "0" + minute;
+
+  return `${month}-${day}-${hour}-${minute}`;
+}
