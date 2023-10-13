@@ -131,8 +131,8 @@ async function scrapePage(recordName, record) {
       ],
     })
     .then(async (browser) => {
-      const username = "gatecap";
-      const pass = "posHQ112015-";
+      const username = "sdvljpoiweb";
+      const pass = "heHvc87eb";
       const page = await browser.newPage();
       page.setDefaultNavigationTimeout(120000); 
 
@@ -151,30 +151,28 @@ async function scrapePage(recordName, record) {
       console.log("at login for ", recordName);
 
       try {
-        await page.waitForSelector("#mat-input-1", { timeout: 10000 });
-        await page.waitForSelector("#mat-input-2");
+        console.log("trying to find login elements...")
+        await page.waitForFunction(() => {
+          const inputs = document.querySelectorAll('.mat-mdc-input-element');
+          return inputs.length >= 2;
+      });
+      
+        const inputElements = await page.$$('.mat-mdc-input-element');
+        
+        // Now you can type into the elements
+        await inputElements[0].type("alfred@gate-cap.com");
+        await inputElements[1].type("KVVE@9810Fm6pKs4");
+      
+        // await page.waitForSelector("#mat-input-1", { timeout: 10000 });
+        // await page.waitForSelector("#mat-input-2");
 
-        await page.type("#mat-input-1", "alfred@gate-cap.com");
-        await page.type("#mat-input-2", "KVVE@9810Fm6pKs4");
+        // await page.type("#mat-input-1", "alfred@gate-cap.com");
+        // await page.type("#mat-input-2", "KVVE@9810Fm6pKs4");
 
         await Promise.all([
           page.waitForNavigation({ waitUntil: "load" }),
           page.click(".login"),
-        ]);
-
-        // await page.waitForSelector(".mat-input-element", { timeout: 120000 });
-
-        // let inputs = await page.$$(".mat-input-element", { timeout: 120000 });
-
-        // await inputs[1].type("alfred@gate-cap.com"); // for username
-        // await inputs[2].type("KVVE@9810Fm6pKs4"); // for password
-
-        // await page.waitForTimeout(3000);
-
-        // await Promise.all([
-        //   page.waitForNavigation({ waitUntil: "load", timeout: 120000 }),
-        //   page.click(".login"),
-        // ]);
+        ]); 
 
         console.log("logged in for", recordName);
         // await page.screenshot({ path: path + "2-logged-in.png" });
@@ -188,8 +186,8 @@ async function scrapePage(recordName, record) {
         console.log("at company discover page for ", recordName);
 
         // await page.type("#mat-input-1", recordName);
-        inputs = await page.$$(".mat-input-element");
-        await inputs[1].type(recordName);
+        inputs = await page.$$("[matinput]");
+        await inputs[0].type(recordName);
 
         console.log("typed company name for ", recordName);
 
