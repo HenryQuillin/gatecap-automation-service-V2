@@ -6,7 +6,6 @@ if (process.env.PORT == null || process.env.PORT == "") {
 } else {
   require("dotenv").config({ path: "/etc/secrets/.env" });
 }
-const { uploadFile } = require("./uploadFile");
 const moment = require("moment-timezone");
 const {
   updateAirtableWithCompanyNotFoundError,
@@ -135,7 +134,7 @@ async function loginToCrunchbase() {
         return await scrapeCompanies(page, records);
       } catch (error) {
         await page.screenshot({ path: path + "7-catch-block.png" });
-        uploadFile(path + "7-catch-block.png", "7-catch-block.png", folderName);
+        // uploadFile(path + "7-catch-block.png", "7-catch-block.png", folderName);
         console.log("PAGE H1:");
         console.log(await page.evaluate(() => document.title));
         console.error("ERROR CAUGHT:" + error);

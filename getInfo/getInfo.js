@@ -6,7 +6,6 @@ if (process.env.PORT == null || process.env.PORT == "") {
 } else {
   require("dotenv").config({ path: "/etc/secrets/.env" });
 }
-const { uploadFile } = require("./uploadFile");
 const moment = require("moment-timezone");
 const { updateAirtableWithCompanyNotFoundError } = require("./helpers");
 
